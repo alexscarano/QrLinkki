@@ -11,9 +11,10 @@ public static class LinkMapper
             original_url = link.OriginalUrl,
             shortened_code = link.ShortenedCode,
             qr_code_path = link.QrCodePath,
+            complete_shortened_url = link.CompleteShortenedUrl,
             created_at = link.CreatedAt,
             expires_at = link.ExpiresAt,
-            clicks = link.Clicks.Select(c => c.ToDto()).ToList()
+            user_id = link.UserId
         };
     }
 
@@ -24,8 +25,10 @@ public static class LinkMapper
             OriginalUrl = linkDto.original_url,
             ShortenedCode = linkDto.shortened_code,
             QrCodePath = linkDto.qr_code_path,
+            CompleteShortenedUrl = linkDto.complete_shortened_url,
             CreatedAt = linkDto.created_at,
             ExpiresAt = linkDto.expires_at,
+            UserId = linkDto.user_id
         };
     }
 }

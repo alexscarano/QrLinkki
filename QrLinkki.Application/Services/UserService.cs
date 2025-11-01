@@ -34,4 +34,10 @@ public class UserService : IUserService
 
     public async Task<User?> UpdateUser(User user)
         => await _userRepository.UpdateUser(user);
+
+    public async Task<bool> VerifyIfUserExists(string user_id)
+        => await _userRepository.VerifyIfUserExists(user_id);
+
+    public async Task<User?> GetUserByEmail(string email)
+        => await _userRepository.GetUserByEmail(email);
 }

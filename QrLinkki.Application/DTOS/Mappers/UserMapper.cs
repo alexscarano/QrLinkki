@@ -1,4 +1,5 @@
 ﻿using QrLinkki.Domain.Entities;
+using QrLinkki.Application.Services;
 
 namespace QrLinkki.Application.DTOS.Mappers
 {
@@ -9,10 +10,9 @@ namespace QrLinkki.Application.DTOS.Mappers
             return new UserDto
             {
                 email = user.Email,
-                password_hash = user.PasswordHash,
+                password = string.Empty, // never expose password back
                 created_at = user.CreatedAt,
                 updated_at = user.UpdatedAt,
-                links = user.Links.Select(c => c.ToDto()).ToList()
             };
         }
 
@@ -21,7 +21,7 @@ namespace QrLinkki.Application.DTOS.Mappers
             return new User
             {
                 Email = userDto.email,
-                PasswordHash = userDto.password_hash,
+                PasswordHash = userDto.password.HashPassword(),
                 CreatedAt = userDto.created_at,
                 UpdatedAt = userDto.updated_at
             };

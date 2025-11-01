@@ -21,6 +21,11 @@ namespace QrLinkki.Infrastructure.Persistence.Configurations
                 .HasMaxLength(2048)
                 .HasColumnName("original_url");
 
+            b.Property(l => l.CompleteShortenedUrl)
+                .IsRequired()
+                .HasMaxLength(255)
+                .HasColumnName("complete_shortened_url");
+
             b.Property(l => l.ShortenedCode)
                 .IsRequired()
                 .HasMaxLength(20)
@@ -39,6 +44,10 @@ namespace QrLinkki.Infrastructure.Persistence.Configurations
 
             b.Property(l => l.UserId)
                 .HasColumnName("user_id");
+
+            b.HasIndex(l => l.ShortenedCode)
+                .IsUnique()
+                .HasDatabaseName("UQ_Links_ShortenedCode"); 
 
             b.HasOne(l => l.User)
                 .WithMany(u => u.Links)

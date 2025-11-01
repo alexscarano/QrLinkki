@@ -15,11 +15,11 @@ namespace QrLinkki.Application.Services
             _linkRepository = linkRepository;
         }
 
-        public async Task<bool> DeleteLink(int link_id)
+        public async Task<bool> DeleteLink(string link_id)
         => await _linkRepository.DeleteLink(link_id);
 
-        public async Task<Link?> GetLink(int link_id)
-        => await _linkRepository.GetLink(link_id);
+        public async Task<Link?> GetLink(string code)
+        => await _linkRepository.GetLink(code);
 
         public async Task<IEnumerable<Link>?> GetLinksOfUserLogged(int user_id)
         => await _linkRepository.GetLinks(user_id);
@@ -31,11 +31,21 @@ namespace QrLinkki.Application.Services
                 throw new Exception("Link inválido.");
             }
 
-            link.ShortenedCode = $"{_baseUrl}/{CodeGenerator.GenerateShortCode()}";
+            var randomCode = _linkRepository.GenerateShortCode().Result;
+
+            link.ShortenedCode = randomCode;
+
+            link.CompleteShortenedUrl = $"{_baseUrl}/{randomCode}";
 
             // por enquanto 
-            link.QrCodePath = $"qrcodes/{link.ShortenedCode}.png";
-            
+            link.QrCodePath = $"qrcodes/{randomCode}.png";
+
+            // Garantir que UserId não seja 0 (fallback temporário ao user 1)
+            if (link.UserId == 0)
+            {
+                link.UserId = 1; // usar o usuário 1 existente enquanto não há autenticação
+            }
+
             var created = await _linkRepository.CreateLink(link);
 
             if (!created)
@@ -46,7 +56,7 @@ namespace QrLinkki.Application.Services
             return link;
         }   
 
-        public async Task<Link?> UpdateLink(Link link)
-        => await _linkRepository.UpdateLink(link);
+        public async Task<Link?> UpdateLink(Link link, string? code)
+        => await _linkRepository.UpdateLink(link, code);
     }
 }

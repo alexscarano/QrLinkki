@@ -2,6 +2,7 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 using QrLinkki.Infrastructure.Persistence.Data;
 
@@ -10,9 +11,11 @@ using QrLinkki.Infrastructure.Persistence.Data;
 namespace QrLinkki.Infrastructure.Persistence.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    partial class AppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20251101155846_TornandoUserNullable")]
+    partial class TornandoUserNullable
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.10");
@@ -95,10 +98,6 @@ namespace QrLinkki.Infrastructure.Persistence.Migrations
 
                     b.HasKey("LinkId")
                         .HasName("PK_Links_LinkId");
-
-                    b.HasIndex("ShortenedCode")
-                        .IsUnique()
-                        .HasDatabaseName("UQ_Links_ShortenedCode");
 
                     b.HasIndex("UserId");
 

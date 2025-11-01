@@ -12,17 +12,10 @@ public class UserRepository : IUserRepository
     {
         _appDbContext = appDbContext;
     }
-    public Task<User?> GetUser(int user_id)
-    {
-        return _appDbContext.Users
-                     .FirstOrDefaultAsync(x => x.UserId == user_id);
-    }
-
+    public async Task<User?> GetUser(int user_id)
+    => await _appDbContext.Users.FirstOrDefaultAsync(x => x.UserId == user_id);
     public async Task<IEnumerable<User>?> GetUsers()
-    {
-        return await _appDbContext.Users.ToListAsync();
-    }
-
+    =>  await _appDbContext.Users.ToListAsync();
     public async Task<bool> CreateUser(User user)
     {
         try
@@ -49,9 +42,10 @@ public class UserRepository : IUserRepository
             if (userDb is null)
                 return null;
 
-            if (userDb.Email is not null)
+            // Apply incoming non-empty values to the database entity
+            if (!string.IsNullOrWhiteSpace(user.Email))
                 userDb.Email = user.Email;
-            if (userDb.PasswordHash is not null)
+            if (!string.IsNullOrWhiteSpace(user.PasswordHash))
                 userDb.PasswordHash = user.PasswordHash;
 
             userDb.UpdatedAt = DateTime.Now;
@@ -66,7 +60,6 @@ public class UserRepository : IUserRepository
             return null;
         }
     }
-
     public async Task<bool> DeleteUser(int user_id)
     {
         try
@@ -87,6 +80,9 @@ public class UserRepository : IUserRepository
         }
 
     }
+    public async Task<bool> VerifyIfUserExists(string user_id)
+    => await _appDbContext.Users.AnyAsync(u => u.Email == user_id);
 
-
+    public async Task<User?> GetUserByEmail(string email)
+    => await _appDbContext.Users.FirstOrDefaultAsync(u => u.Email == email);
 }

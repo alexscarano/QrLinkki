@@ -4,15 +4,16 @@ namespace QrLinkki.Domain.Interfaces;
 
 public interface ILinkRepository
 {
-    public Task<Link?> GetLink(int link_id); 
+    public Task<Link?> GetLink(string code); 
 
     public Task<IEnumerable<Link>?> GetLinks(int user_id);
 
     public Task<bool> CreateLink(Link link);
 
-    public Task<Link?> UpdateLink(Link link);
+    public Task<Link?> UpdateLink(Link link, string? code);
 
-    public Task<bool> DeleteLink(int link_id);
+    public Task<bool> DeleteLink(string link_id);
 
+    public Task<string> GenerateShortCode(int length = 6);
 }
 
