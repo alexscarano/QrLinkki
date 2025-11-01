@@ -19,6 +19,10 @@ namespace QrLinkki.Infrastructure.Persistence.Configurations
             b.Property(c => c.ClickedAt)
                 .HasColumnName("clicked_at");
 
+            b.Property(c => c.IpAddress)
+                .HasMaxLength(45)
+                .HasColumnName("ip_address");
+
             b.Property(c => c.DeviceInfo)
                 .HasMaxLength(255)
                 .HasColumnName("device_info");

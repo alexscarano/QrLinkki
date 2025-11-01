@@ -7,6 +7,7 @@ var app = builder.Build();
 
 app.HttpExtensions();
 app.MapLinksEndpoints();
+app.MapUserEndpoints();
 
 
 app.Run();

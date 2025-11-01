@@ -1,16 +1,16 @@
 ﻿using QrLinkki.Application.Interfaces;
-using QrLinkki.Infrastructure.Repository;
 using QrLinkki.Domain.Entities;
 using QrLinkki.Application.Helpers;
-using System.Reflection.Metadata.Ecma335;
+using QrLinkki.Domain.Interfaces;
 
-namespace QrLinkki.Api.Services
+namespace QrLinkki.Application.Services
 {
     public class LinkService : ILinkService
     {
-        private readonly LinkRepository _linkRepository;
+        private readonly ILinkRepository _linkRepository;
+        private readonly string _baseUrl = "https://localhost:5001";
 
-        public LinkService(LinkRepository linkRepository)
+        public LinkService(ILinkRepository linkRepository)
         {
             _linkRepository = linkRepository;
         }
@@ -31,7 +31,7 @@ namespace QrLinkki.Api.Services
                 throw new Exception("Link inválido.");
             }
 
-            link.ShortenedCode = CodeGenerator.GenerateShortCode();
+            link.ShortenedCode = $"{_baseUrl}/{CodeGenerator.GenerateShortCode()}";
 
             // por enquanto 
             link.QrCodePath = $"qrcodes/{link.ShortenedCode}.png";

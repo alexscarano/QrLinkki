@@ -50,13 +50,16 @@ public class UserRepository : IUserRepository
                 return null;
 
             if (userDb.Email is not null)
-                user.Email = userDb.Email;
+                userDb.Email = user.Email;
             if (userDb.PasswordHash is not null)
-                user.PasswordHash = userDb.PasswordHash;
+                userDb.PasswordHash = user.PasswordHash;
 
-            user.UpdateAt = DateTime.Now;
+            userDb.UpdatedAt = DateTime.Now;
 
-            return user;
+            _appDbContext.Users.Update(userDb);
+            await _appDbContext.SaveChangesAsync();
+
+            return userDb;
         }
         catch 
         {

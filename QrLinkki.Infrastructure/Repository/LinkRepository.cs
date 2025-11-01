@@ -5,7 +5,7 @@ using QrLinkki.Infrastructure.Persistence.Data;
 
 namespace QrLinkki.Infrastructure.Repository;
 
-public class LinkRepository : ILinkRespository
+public class LinkRepository : ILinkRepository
 {
     private readonly AppDbContext _appDbContext;
 
@@ -75,16 +75,16 @@ public class LinkRepository : ILinkRespository
                 return null;
 
             if (linkDb.OriginalUrl is not null)
-                link.OriginalUrl = linkDb.OriginalUrl;
+                linkDb.OriginalUrl = link.OriginalUrl;
             if (linkDb.ShortenedCode is not null)
-                link.ShortenedCode = linkDb.ShortenedCode;
+                linkDb.ShortenedCode = link.ShortenedCode;
             if (linkDb.QrCodePath is not null)
-                link.QrCodePath = linkDb.QrCodePath;
+                linkDb.QrCodePath = link.QrCodePath;
 
-            _appDbContext.Links.Update(link);
+            _appDbContext.Links.Update(linkDb);
             await _appDbContext.SaveChangesAsync();
 
-            return link;
+            return linkDb;
         }
         catch 
         {

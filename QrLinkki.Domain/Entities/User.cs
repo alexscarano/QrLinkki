@@ -10,7 +10,7 @@
 
         public DateTime CreatedAt { get; set; } = DateTime.Now;
 
-        public DateTime? UpdateAt { get; set; }
+        public DateTime? UpdatedAt { get; set; }
 
         // Navigation properties can be added here in the future
         public ICollection<Link> Links { get; set; } = new List<Link>();

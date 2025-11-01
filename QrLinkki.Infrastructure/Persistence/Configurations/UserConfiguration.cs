@@ -29,8 +29,12 @@ namespace QrLinkki.Infrastructure.Persistence.Configurations
             b.Property(u => u.CreatedAt)
                 .HasColumnName("created_at");
 
-            b.Property(u => u.UpdateAt)
+            b.Property(u => u.UpdatedAt)
                 .HasColumnName("updated_at");
+
+            //b.HasIndex(u => u.Email)
+            //    .IsUnique()
+            //    .HasDatabaseName("UQ_Users_Email");
 
             b.HasMany(u => u.Links)
                 .WithOne(l => l.User)

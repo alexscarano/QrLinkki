@@ -2,7 +2,7 @@
 
 namespace QrLinkki.Domain.Interfaces;
 
-public interface ILinkRespository
+public interface ILinkRepository
 {
     public Task<Link?> GetLink(int link_id); 
 
