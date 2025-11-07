@@ -1,4 +1,7 @@
-﻿namespace QrLinkki.Api.Endpoints;
+﻿using System.Security.Claims;
+using static System.Net.WebRequestMethods;
+
+namespace QrLinkki.Api.Endpoints;
 
 public static class LinkEndpoints
 {
@@ -7,7 +10,7 @@ public static class LinkEndpoints
         app.MapGet("/r/{code}", async (ILinkService service, string code) =>
         {
             var link = await service.GetLink(code);
-
+            
             if (link is null)
             {
                 return Results.NotFound();
@@ -19,9 +22,16 @@ public static class LinkEndpoints
         .RequireAuthorization("Authenticated");
         
 
-        app.MapGet("/api/links", async (ILinkService service) =>
+        app.MapGet("/api/links", async (ILinkService service, HttpContext http) =>
         {
-            var links = await service.GetLinksOfUserLogged(1); 
+            var userIdClaim = http.User.FindFirst(ClaimTypes.Name)?.Value;
+
+            if (string.IsNullOrWhiteSpace(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
+            {
+                return Results.Unauthorized();
+            }
+
+            var links = await service.GetLinksOfUserLogged(userId); 
 
             if (links is null)
             {
@@ -45,9 +55,20 @@ public static class LinkEndpoints
         })
         .RequireAuthorization("Authenticated");
 
-        app.MapPost("/api/links", async (ILinkService service, LinkDto linkDto) =>
+        app.MapPost("/api/links", async (ILinkService service, LinkDto linkDto, HttpContext http) =>
         {
+            // Map DTO to entity
             var link = linkDto.ToEntity();
+
+            // Extract user id from JWT claim (we used ClaimTypes.Name to store user id)
+            var userIdClaim = http.User.FindFirst(ClaimTypes.Name)?.Value;
+
+            if (string.IsNullOrWhiteSpace(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
+            {
+                return Results.Unauthorized();
+            }
+
+            link.UserId = userId;
 
             var createdLink = await service.ShortenNewLink(link);
 
@@ -55,9 +76,19 @@ public static class LinkEndpoints
         })
         .RequireAuthorization("Authenticated");
 
-        app.MapPut("/api/links/{code}", async (ILinkService service, string code, LinkDto linkDto) =>
+        app.MapPut("/api/links/{code}", async (ILinkService service, string code, LinkDto linkDto, HttpContext http) =>
         {
             var link = linkDto.ToEntity();
+
+            // Extract user id from JWT claim and set it on entity (if present)
+            var userIdClaim = http.User.FindFirst(ClaimTypes.Name)?.Value;
+
+            if (string.IsNullOrWhiteSpace(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
+            {
+                return Results.Unauthorized();
+            }
+
+            link.UserId = userId;
 
             var updatedLink = await service.UpdateLink(link, code);
             if (updatedLink is null)

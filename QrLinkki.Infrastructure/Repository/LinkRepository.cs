@@ -57,13 +57,10 @@ public class LinkRepository : ILinkRepository
         }
         catch (DbUpdateException dbEx)
         {
-            // Log detalhado para depuração (inclui InnerException do SQLite)
-            Console.Error.WriteLine(dbEx.ToString());
             return false;
         }
         catch (Exception ex)
         {
-            Console.Error.WriteLine(ex.ToString());
             return false;
         }
     }
@@ -133,7 +130,6 @@ public class LinkRepository : ILinkRepository
         }
         catch (Exception ex)
         {
-            Console.Error.WriteLine(ex.ToString());
             throw new ArgumentException(nameof(link));
         }
     }

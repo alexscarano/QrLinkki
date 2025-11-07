@@ -40,12 +40,6 @@ namespace QrLinkki.Application.Services
             // por enquanto 
             link.QrCodePath = $"qrcodes/{randomCode}.png";
 
-            // Garantir que UserId não seja 0 (fallback temporário ao user 1)
-            if (link.UserId == 0)
-            {
-                link.UserId = 1; // usar o usuário 1 existente enquanto não há autenticação
-            }
-
             var created = await _linkRepository.CreateLink(link);
 
             if (!created)

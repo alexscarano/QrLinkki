@@ -5,7 +5,6 @@ builder.AddServices();
 builder.AddSwagger();
 builder.AddAuthentication();
 
-
 var app = builder.Build();
 
 app.HttpExtensions();
