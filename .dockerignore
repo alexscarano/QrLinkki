@@ -1,0 +1,13 @@
+.git
+.gitignore
+Dockerfile
+README.md
+*.md
+bin/
+obj/
+.vscode/
+.vs/
+*.user
+*.db
+*.suo
+*.cache
