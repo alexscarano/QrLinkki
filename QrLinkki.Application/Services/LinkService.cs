@@ -38,7 +38,7 @@ namespace QrLinkki.Application.Services
 
         public async Task<LinkDto?> GetLinkWithQrBase64(string code)
         {
-            var link = await _linkRepository.GetLink(code);
+            var link = await _linkRepository.GetLinkWithoutIncrement(code);
 
             if (link is null)
             {

@@ -8,7 +8,6 @@
 
   <ItemGroup>
     <Folder Include="Persistence\Database\" />
-    <Folder Include="Persistence\Migrations\" />
   </ItemGroup>
 
   <ItemGroup>

@@ -8,16 +8,12 @@ public class AppDbContext : DbContext
 {
     public AppDbContext(DbContextOptions<AppDbContext> options) : base(options)
     {}
-
     public DbSet<User> Users { get; set; }
     public DbSet<Link> Links { get; set; }
-    public DbSet<Click> Clicks { get; set; }
-
     protected override void OnModelCreating(ModelBuilder mb)
     {
         mb.ApplyConfiguration(new UserConfiguration());
         mb.ApplyConfiguration(new LinkConfiguration());
-        mb.ApplyConfiguration(new ClickConfiguration());
     }
 }
 

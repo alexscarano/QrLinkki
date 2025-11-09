@@ -12,6 +12,7 @@ public static class LinkMapper
             shortened_code = link.ShortenedCode,
             qr_base64 = link.QrCodePath,
             complete_shortened_url = link.CompleteShortenedUrl,
+            click = link.Clicks,
             created_at = link.CreatedAt,
             expires_at = link.ExpiresAt,
             user_id = link.UserId
@@ -25,6 +26,7 @@ public static class LinkMapper
             original_url = link.OriginalUrl,
             shortened_code = link.ShortenedCode,
             qr_base64 = string.Empty,
+            click = 0,
             complete_shortened_url = link.CompleteShortenedUrl,
             created_at = link.CreatedAt,
             expires_at = link.ExpiresAt,

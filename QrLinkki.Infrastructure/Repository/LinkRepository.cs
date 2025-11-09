@@ -18,10 +18,31 @@ public class LinkRepository : ILinkRepository
     {
         var parsedId = int.TryParse(code, out int id) ? id : -1;
 
-        return await _appDbContext.Links
+        var link = await _appDbContext.Links
                      .FirstOrDefaultAsync(x => x.LinkId == parsedId
                      || x.ShortenedCode == code);
+
+        if (link is null) 
+        {
+            return null;
+        }
+
+        link.RegisterClick();
+        _appDbContext.Links.Update(link);
+        await _appDbContext.SaveChangesAsync();
+
+        return link;
     }
+
+    public async Task<Link?> GetLinkWithoutIncrement(string code)
+    {
+        var parsedId = int.TryParse(code, out int id) ? id : -1;
+
+        return await _appDbContext.Links
+                 .FirstOrDefaultAsync(x => x.LinkId == parsedId
+                 || x.ShortenedCode == code);
+    }
+
     public async Task<IEnumerable<Link>?> GetLinks(int user_id)
     {
         return await _appDbContext.Links
@@ -153,4 +174,5 @@ public class LinkRepository : ILinkRepository
 
         return cod;
     }
+
 }

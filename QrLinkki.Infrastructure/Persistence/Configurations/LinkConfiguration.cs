@@ -36,6 +36,9 @@ namespace QrLinkki.Infrastructure.Persistence.Configurations
                 .HasMaxLength(255)
                 .HasColumnName("qr_code_path");
 
+            b.Property(l => l.Clicks)
+                .HasColumnName("clicks");
+
             b.Property(l => l.CreatedAt)
                 .HasColumnName("created_at");
 
@@ -53,12 +56,6 @@ namespace QrLinkki.Infrastructure.Persistence.Configurations
                 .WithMany(u => u.Links)
                 .HasForeignKey(l => l.UserId)
                 .HasConstraintName("FK_Links_Users_UserId")
-                .OnDelete(DeleteBehavior.Cascade);
-
-            b.HasMany(l => l.Clicks)
-                .WithOne(c => c.Link)
-                .HasForeignKey(c => c.LinkId)
-                .HasConstraintName("FK_Clicks_Links_LinkId")
                 .OnDelete(DeleteBehavior.Cascade);
         }
     }

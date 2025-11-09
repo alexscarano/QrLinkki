@@ -15,13 +15,19 @@
         public DateTime CreatedAt { get; set; } = DateTime.Now;
 
         public DateTime? ExpiresAt { get; set; }
-        
+
+        public int Clicks { get; private set; } = 0;
+
         public int UserId { get; set; }
 
         // Navigation properties
         public User? User { get; set; }
 
-        public ICollection<Click> Clicks { get; set; } = new List<Click>();
+        // Method to register a click
+        public void RegisterClick()
+        {
+            Clicks++;
+        }
 
     }
 }
