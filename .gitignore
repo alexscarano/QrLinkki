@@ -97,3 +97,4 @@ yarn-error.*
 # generated native folders
 /ios
 /android
+/QrLinkki.Api/Storage

@@ -26,12 +26,42 @@ namespace QrLinkki.Api.Extensions
 
         public static WebApplicationBuilder AddServices(this WebApplicationBuilder builder)
         {
-            builder.Services.AddScoped<ILinkService, LinkService>();
+            builder.Services.AddHttpContextAccessor();
+
+            builder.Services.AddScoped<IQrCodeService, QrCodeService>(provider =>
+            {
+                var env = provider.GetRequiredService<IWebHostEnvironment>();
+
+                // se wwwroot não existir, cria automaticamente
+                var storagePath = Path.Combine(env.ContentRootPath, "Storage");
+                if (!Directory.Exists(storagePath))
+                {
+                    Directory.CreateDirectory(storagePath);
+                }
+
+                return new QrCodeService(storagePath);
+            });
+
+            builder.Services.AddScoped<ILinkService, LinkService>(provider => 
+            {
+                var linkRepository = provider.GetRequiredService<ILinkRepository>();
+                var QrCodeService = provider.GetRequiredService<IQrCodeService>();
+                var httpContextAccessor = provider.GetRequiredService<IHttpContextAccessor>();
+
+                var request = httpContextAccessor.HttpContext?.Request;
+
+                var baseUrl = request is not null
+                    ? $"{request.Scheme}://{request.Host}"
+                    : "https://localhost:5001";
+
+                return new LinkService(linkRepository, QrCodeService, baseUrl);
+            });
+
             builder.Services.AddScoped<IUserService, UserService>();
             builder.Services.AddScoped<ILinkRepository, LinkRepository>();
             builder.Services.AddScoped<IUserRepository, UserRepository>();
             builder.Services.AddScoped<IAuthService, AuthService>();
-
+            
             return builder;
         }
 

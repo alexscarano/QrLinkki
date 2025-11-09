@@ -1,5 +1,4 @@
 ﻿using System.Security.Claims;
-using static System.Net.WebRequestMethods;
 
 namespace QrLinkki.Api.Endpoints;
 
@@ -17,7 +16,7 @@ public static class LinkEndpoints
             }
 
             // Return an HTTP redirect to the original URL
-            return Results.Redirect(link.OriginalUrl);
+            return Results.Redirect(link.original_url);
         })
         .RequireAuthorization("Authenticated");
         
@@ -44,14 +43,14 @@ public static class LinkEndpoints
 
         app.MapGet("/api/links/{code}", async (ILinkService service, string code) =>
         {
-            var link = await service.GetLink(code);
+            var link = await service.GetLinkWithQrBase64(code);
 
             if (link is null)
             {
                 return Results.NotFound();
             }
 
-            return Results.Ok(link.ToDto());
+            return Results.Ok(link);
         })
         .RequireAuthorization("Authenticated");
 
