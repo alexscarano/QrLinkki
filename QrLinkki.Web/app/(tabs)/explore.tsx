@@ -58,7 +58,8 @@ export default function TabTwoScreen() {
           different screen densities
         </ThemedText>
         <Image
-          source={require('@/assets/images/react-logo.png')}
+          // Use relative path to a static image inside `assets` so Metro can resolve it.
+          source={require('../../assets/android/res/mipmap-xxxhdpi/ic_launcher.png')}
           style={{ width: 100, height: 100, alignSelf: 'center' }}
         />
         <ExternalLink href="https://reactnative.dev/docs/images">
@@ -107,6 +108,6 @@ const styles = StyleSheet.create({
   },
   titleContainer: {
     flexDirection: 'row',
-    gap: 8,
+    // gap not supported cross-platform; use margins on children if needed
   },
 });

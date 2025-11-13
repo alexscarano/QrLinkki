@@ -1,6 +1,7 @@
 ﻿using QrLinkki.Domain.Entities;
 using QrLinkki.Application.DTOS;
 using QrLinkki.Application.DTOS.Mappers;
+using System.Security.Claims;
 
 namespace QrLinkki.Api.Endpoints;
 
@@ -8,8 +9,21 @@ public static class UserEndpoints
 {
     public static WebApplication MapUserEndpoints(this WebApplication app)
     {
-        app.MapGet("/api/users/{user_id}", async (IUserService service, int user_id) =>
+        // Allow owners to fetch their own profile. Require authentication and ownership.
+        app.MapGet("/api/users/{user_id}", async (IUserService service, int user_id, HttpContext http) =>
         {
+            var userIdClaim = http.User.FindFirst(ClaimTypes.Name)?.Value;
+
+            if (string.IsNullOrWhiteSpace(userIdClaim) || !int.TryParse(userIdClaim, out var callerId))
+            {
+                return Results.Unauthorized();
+            }
+
+            if (callerId != user_id)
+            {
+                return Results.Forbid();
+            }
+
             var user = await service.GetUser(user_id);
             if (user is null)
             {
@@ -46,8 +60,20 @@ public static class UserEndpoints
 
         });
 
-        app.MapPut("/api/users/{user_id}", async(IUserService service, int user_id, UserDto userDto) =>
+        app.MapPut("/api/users/{user_id}", async(IUserService service, int user_id, UserDto userDto, HttpContext http) =>
         {
+            var userIdClaim = http.User.FindFirst(ClaimTypes.Name)?.Value;
+
+            if (string.IsNullOrWhiteSpace(userIdClaim) || !int.TryParse(userIdClaim, out var callerId))
+            {
+                return Results.Unauthorized();
+            }
+
+            if (callerId != user_id)
+            {
+                return Results.Forbid();
+            }
+
             var user = userDto.ToEntity();
             user.UserId = user_id;
 
@@ -62,8 +88,21 @@ public static class UserEndpoints
         })
         .RequireAuthorization("Authenticated");
 
-        app.MapDelete("api/users/{user_id}", async (IUserService service, int user_id) =>
+        // Only the owner may delete their account
+        app.MapDelete("/api/users/{user_id}", async (IUserService service, int user_id, HttpContext http) =>
         {
+            var userIdClaim = http.User.FindFirst(ClaimTypes.Name)?.Value;
+
+            if (string.IsNullOrWhiteSpace(userIdClaim) || !int.TryParse(userIdClaim, out var callerId))
+            {
+                return Results.Unauthorized();
+            }
+
+            if (callerId != user_id)
+            {
+                return Results.Forbid();
+            }
+
             var deleted = await service.DeleteUser(user_id);
 
             if (!deleted)

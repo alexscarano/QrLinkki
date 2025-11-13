@@ -9,7 +9,7 @@
 
 .vscode/*
 .vs/*
-
+android
 # Build results
 [Dd]ebug/
 [Dd]ebugPublic/
@@ -98,3 +98,4 @@ yarn-error.*
 /ios
 /android
 /QrLinkki.Api/Storage
+

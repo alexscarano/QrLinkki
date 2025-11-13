@@ -58,6 +58,90 @@ A aplicação irá expor a API localmente (tipicamente em `http://localhost:5000
 3. Realize suas modificações
 4. Abra um Pull Request
 
+## Frontend (Expo) — descrição e tecnologias
+
+O frontend foi construído com Expo (React Native para Web) e TypeScript que fornece a interface de usuário para criação, gerenciamento e visualização de links encurtados e QR Codes. Foi projetado para ser cross-platform (web e mobile), com foco em acessibilidade visual, usabilidade em dispositivos de toque e integração com a API backend via REST + JWT.
+
+Estrutura do frontend (visão geral):
+
+- `QrLinkki.Web/app/` — rotas/páginas principais (login, registro, dashboard, links, criação/edição de links, detalhes públicos).
+- `QrLinkki.Web/components/` — componentes reutilizáveis de UI (headers, cards, botões, ícones).
+- `QrLinkki.Web/constants/` — tokens de tema e configurações visuais (cores, espaçamentos).
+- `QrLinkki.Web/lib/` — utilitários e wrappers (API client, storage, helpers).
+- `QrLinkki.Web/hooks/` — hooks personalizados para estado e efeitos compartilhados.
+- `QrLinkki.Web/assets/` — imagens e ícones utilizados pela interface.
+
+Principais tecnologias e decisões:
+
+- Expo + expo-router para navegação e publicação multiplataforma.
+- TypeScript para segurança de tipos em tempo de desenvolvimento.
+- Theming e componentes compartilhados para manter consistência visual entre telas.
+- Uso de toasts e feedbacks visuais para ações como copiar para a área de transferência.
+- Estratégia de cabeçalho híbrida: cabeçalho nativo estilizado globalmente, com telas específicas em full-bleed quando necessário para fidelidade visual.
+
+Funcionalidades do frontend (resumo):
+
+- Autenticação (login/register) com restauração de token local (`qrlinkki_token`) e tratamento global de respostas 401 para logout/redirect.
+- Painel do usuário (dashboard) com listagem de links, ações rápidas (copiar, abrir, editar, deletar) e visual compacto das URLs.
+- Criação/edição de links com UI adaptada para mobile (inputs legíveis e botões full-width).
+- Página de detalhe de link (acesso controlado pelo proprietário) com QR responsivo, destaque do código e ações de usuário com feedback.
+- Cross-platform: atenção a estilos e propriedades compatíveis entre web e mobile; fallback para clipboard nativo quando necessário.
+
+Observação: o texto e o código do backend permaneceram inalterados — o README mantém a seção de backend exatamente como estava.
+
+## Créditos
+
+- Frontend desenvolvido por: Wpnnt (https://github.com/Wpnnt). O frontend inclui a interface web/mobile (Expo) com dashboard, criação/edição de links, geração de QR e integração JWT com o backend.
+
+## Notas de segurança e comportamento importante
+
+- Propriedade dos links: operações sensíveis (GET/PUT/DELETE em `/api/links/{code}` e ações de gerenciamento no painel) exigem autenticação e são verificadas no servidor para garantir que apenas o proprietário do link possa visualizar/editar/deletar.
+- Endpoints de usuário (GET/PUT/DELETE `/api/users/{user_id}`) também exigem autenticação e são validados para que apenas o próprio usuário possa alterar ou remover sua conta.
+- O endpoint público de redirecionamento curto `/r/{code}` permanece público por design — cada acesso público a esse caminho incrementa o contador de cliques. Se deseja que os shortlinks sejam privados, é necessário alterar esse comportamento (impacto: shortlinks/QR deixarão de funcionar publicamente).
+- O frontend lida com respostas 401/403: 401 dispara limpeza de sessão/redirect para login; 403 apresenta mensagem de acesso negado e redireciona ou oculta ações conforme apropriado.
+
+## Como rodar o frontend (Expo)
+
+Pré-requisitos rápidos:
+
+- Node.js (recomenda-se 16+ ou 18+)
+- npm ou yarn
+- (Opcional) Expo Go no celular para testar em dispositivo físico
+
+Passos (PowerShell / Windows):
+
+```powershell
+# vá para a pasta do frontend
+cd QrLinkki.Web
+
+# instale dependências
+npm install
+
+# iniciar em modo web
+npm run web
+
+# ou iniciar o dev server (abre o Metro/DevTools - escolhe web/android/ios)
+npm start
+
+# abrir diretamente no Android (se configurado)
+npm run android
+
+# abrir no iOS (apenas em macOS)
+npm run ios
+```
+
+Notas:
+
+- `npm start` abre a interface do Expo (dev tools). A partir dela você pode escolher rodar para web, Android ou iOS.
+- Se preferir yarn: use `yarn` e `yarn web` / `yarn start`.
+- Certifique-se de que a API backend esteja rodando (por padrão em `http://localhost:5000`) para que o frontend consiga autenticar e consumir os endpoints.
+
+Problemas comuns:
+
+- Caso não consiga conectar ao backend, verifique se a API está em execução e se não há bloqueios de CORS/porta.
+- Em dispositivos móveis, ao usar Expo Go, assegure-se que o computador e o celular estejam na mesma rede.
+
+
 ## Licença
 
 [MIT](LICENSE)

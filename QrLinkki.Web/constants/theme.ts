@@ -16,6 +16,13 @@ export const Colors = {
     icon: '#687076',
     tabIconDefault: '#687076',
     tabIconSelected: tintColorLight,
+    // auth screens / brand
+    authBackground: '#05141a',
+    authCard: '#07101a',
+    authAccent: '#0ea5e9',
+    authSubtitle: '#9ad1ef',
+    authBorder: '#0b2a33',
+    authButtonText: '#012',
   },
   dark: {
     text: '#ECEDEE',
@@ -24,6 +31,13 @@ export const Colors = {
     icon: '#9BA1A6',
     tabIconDefault: '#9BA1A6',
     tabIconSelected: tintColorDark,
+    // auth screens / brand - reuse light variants where appropriate for contrast
+    authBackground: '#05141a',
+    authCard: '#07101a',
+    authAccent: '#0ea5e9',
+    authSubtitle: '#9ad1ef',
+    authBorder: '#0b2a33',
+    authButtonText: '#012',
   },
 };
 

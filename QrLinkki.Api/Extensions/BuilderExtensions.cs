@@ -27,6 +27,24 @@ namespace QrLinkki.Api.Extensions
         public static WebApplicationBuilder AddServices(this WebApplicationBuilder builder)
         {
             builder.Services.AddHttpContextAccessor();
+            
+            // Allow CORS for local development (expo/web/dev servers)
+            builder.Services.AddCors(options =>
+            {
+                options.AddPolicy("AllowDev", policy =>
+                {
+                    policy.WithOrigins(
+                        "http://localhost:19006", // expo web
+                        "http://localhost:19000", // expo dev default
+                        "http://localhost:8081",  // expo metro web server (common)
+                        "http://localhost:3000",  // common web dev
+                        "http://localhost:5000"   // backend (if accessed directly)
+                    )
+                    .AllowAnyHeader()
+                    .AllowAnyMethod()
+                    .AllowCredentials();
+                });
+            });
 
             builder.Services.AddScoped<IQrCodeService, QrCodeService>(provider =>
             {
