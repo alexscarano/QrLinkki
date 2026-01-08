@@ -113,7 +113,9 @@ QrLinkki.Web/
 |-----------|---------|---------|
 | **Expo** | ~54.0 | Framework mobile |
 | **React Native** | 0.81 | Framework de UI |
-| **React** | 19.1 | Biblioteca de UI |## 📱 Como Rodar o Projeto
+| **React** | 19.1 | Biblioteca de UI |
+
+## 📱 Como Rodar o Projeto
 
 Este projeto utiliza scripts PowerShell para facilitar o build e desenvolvimento Android.
 
