@@ -4,7 +4,7 @@
     {
         public static WebApplication HttpExtensions(this WebApplication app)
         {
-            // Enable CORS (development policy)
+            // Habilita CORS (política de desenvolvimento)
             app.UseCors("AllowDev");
 
             app.UseHttpsRedirection();

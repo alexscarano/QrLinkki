@@ -1,0 +1,39 @@
+version: '3.8'
+
+services:
+  # Base de Dados (SQL Server)
+  db:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: qrlinkki-db
+    restart: always
+    environment:
+      - ACCEPT_EULA=Y
+      - MSSQL_SA_PASSWORD=${MSSQL_SA_PASSWORD:-WarPh@2026!QrLinkkiStrong#}
+    ports:
+      - "1433:1433"
+    volumes:
+      - sql-data:/var/opt/mssql
+
+  # API Backend
+  api:
+    image: ${DOCKER_USERNAME:-warph}/qrlinkki-api:latest
+    container_name: qrlinkki-api
+    restart: always
+    build:
+      context: .
+      dockerfile: QrLinkki.Api/Dockerfile
+    depends_on:
+      - db
+    ports:
+      - "80:5000"
+    environment:
+      - ASPNETCORE_ENVIRONMENT=${ASPNETCORE_ENVIRONMENT:-Production}
+      - ConnectionStrings__DefaultConnection=${DB_CONNECTION_STRING:-Server=db;Database=QrLinkki;User Id=sa;Password=WarPh@2026!QrLinkkiStrong#;TrustServerCertificate=True;}
+      - Jwt__authQrLinkki=${JWT_KEY:-THIS_IS_A_DEFAULT_DEV_KEY_CHANGE_IN_PROD_123}
+      - ASPNETCORE_URLS=http://+:5000
+    volumes:
+      - api-storage:/app/Storage
+
+volumes:
+  sql-data:
+  api-storage:

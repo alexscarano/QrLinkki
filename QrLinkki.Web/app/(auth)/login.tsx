@@ -19,6 +19,7 @@ import { useRouter, useLocalSearchParams } from 'expo-router';
 
 import MaterialIcons from '@expo/vector-icons/MaterialIcons';
 import * as api from '@/lib/api';
+import { logger } from '@/lib/logger';
 import { setTokenStorage, getTokenStorage } from '@/lib/storage';
 import { useToast } from '@/components/ui/Toast';
 
@@ -70,10 +71,10 @@ export default function Login() {
     }
 
     try {
-      console.debug('handleLogin:start', { email });
+      logger.debug('handleLogin:start', { email: email.trim() });
       setLoading(true);
       const token = await api.login(email.trim(), password);
-      console.debug('handleLogin:api.login returned', { token });
+      logger.debug('handleLogin:api.login returned', { hasToken: !!token });
       if (!token) {
         toast.show('error', 'Credenciais inválidas');
         return;
@@ -83,25 +84,30 @@ export default function Login() {
       // verify token was persisted
       try {
         const stored = await getTokenStorage();
-        console.debug('handleLogin:storage after set', { stored });
+        logger.debug('handleLogin:storage after set', { stored: !!stored });
       } catch (e) {
-        console.debug('handleLogin:storage read failed', e);
+        logger.warn('handleLogin:storage read failed', { error: e instanceof Error ? e.message : String(e) });
       }
 
       api.setToken(token);
-      console.debug('handleLogin:about to navigate to dashboard');
+      logger.debug('handleLogin:about to navigate to dashboard');
       // navigate directly to dashboard to avoid extra redirects
       try {
         router.replace('/dashboard');
-        console.debug('handleLogin:navigate called');
+        logger.debug('handleLogin:navigate called');
       } catch (e) {
-        console.debug('handleLogin:navigate error', e);
+        logger.warn('handleLogin:navigate error', { error: e instanceof Error ? e.message : String(e) });
       }
     } catch (err: any) {
-      console.debug('handleLogin:error', err);
-      toast.show('error', err?.message ?? String(err));
+      logger.error('handleLogin:error', err instanceof Error ? err : new Error(String(err)), { email: email.trim() });
+      // Mensagem amigável para 401
+      if (err?.message && err.message.includes('401')) {
+        toast.show('error', 'Email ou senha inválidos ou não cadastrados.');
+      } else {
+        toast.show('error', err?.message ?? 'Erro ao fazer login. Tente novamente.');
+      }
     } finally {
-      console.debug('handleLogin:finally - clearing loading');
+      logger.debug('handleLogin:finally - clearing loading');
       setLoading(false);
     }
   }
@@ -110,7 +116,7 @@ export default function Login() {
     <SafeAreaView style={styles.safe}>
       <KeyboardAvoidingView style={styles.flex} behavior={Platform.OS === 'ios' ? 'padding' : 'height'}>
         <ScrollView contentContainerStyle={styles.container} keyboardShouldPersistTaps="handled">
-  {/* cabeçalho omitido intencionalmente aqui (telas de auth usam layout full-bleed) */}
+          {/* cabeçalho omitido intencionalmente aqui (telas de auth usam layout full-bleed) */}
 
           <Animated.View style={[styles.content, { opacity: fade }]}>
             <MaterialIcons name="qr-code" size={76} color={theme.authAccent} />

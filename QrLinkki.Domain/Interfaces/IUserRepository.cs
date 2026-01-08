@@ -8,7 +8,7 @@ public interface IUserRepository
 
     public Task<IEnumerable<User>?> GetUsers();  
 
-    public Task<bool> CreateUser(User user);
+    public Task<(bool Success, bool Duplicate)> CreateUser(User user);
 
     public Task<User?> UpdateUser(User user);
 

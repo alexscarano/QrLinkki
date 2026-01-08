@@ -1,12 +1,15 @@
 {
   "expo": {
-    "name": "QrLinkki Web",
-    "slug": "qrlinkki-web",
+    "name": "QrLinkki",
+    "slug": "qrlinkki",
     "version": "1.0.0",
     "orientation": "portrait",
   "icon": "./assets/android/res/mipmap-xxxhdpi/ic_launcher.png",
-    "scheme": "qrlinkkiweb",
+    "scheme": "qrlinkki",
     "userInterfaceStyle": "automatic",
+    "assetBundlePatterns": [
+      "assets/**"
+    ],
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true
@@ -19,6 +22,7 @@
   "monochromeImage": "./assets/android/res/mipmap-xxxhdpi/ic_launcher_monochrome.png"
       },
       "edgeToEdgeEnabled": true,
+      "usesCleartextTraffic": true,
       "predictiveBackGestureEnabled": false,
       "permissions": [
         "android.permission.CAMERA"
@@ -26,9 +30,9 @@
       "package": "com.warph.qrlinkkiweb"
     },
     "splash": {
-      "image": "./assets/splash-2732.png",
-      "resizeMode": "cover",
-      "backgroundColor": "#05141a"
+      "image": "./assets/images/splash-icon.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#000000"
     },
     "web": {
       "output": "static",
@@ -39,12 +43,11 @@
       [
         "expo-splash-screen",
         {
-          "image": "./assets/splash-2732.png",
-          "imageWidth": 2732,
-          "resizeMode": "cover",
-          "backgroundColor": "#05141a",
+          "image": "./assets/images/splash-icon.png",
+          "resizeMode": "contain",
+          "backgroundColor": "#000000",
           "dark": {
-            "backgroundColor": "#05141a"
+            "backgroundColor": "#000000"
           }
         }
       ],

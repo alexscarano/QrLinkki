@@ -16,21 +16,30 @@ public class UserRepository : IUserRepository
     => await _appDbContext.Users.FirstOrDefaultAsync(x => x.UserId == user_id);
     public async Task<IEnumerable<User>?> GetUsers()
     =>  await _appDbContext.Users.ToListAsync();
-    public async Task<bool> CreateUser(User user)
+    public async Task<(bool Success, bool Duplicate)> CreateUser(User user)
     {
         try
         {
             if (user is null)
-                return false;
+                return (false, false);
 
             await _appDbContext.Users.AddAsync(user);
             await _appDbContext.SaveChangesAsync();
 
-            return true;
+            return (true, false);
         }
-        catch 
+        catch (DbUpdateException ex)
         {
-            return false;
+            // Verifica violação de restrição de unicidade (SQL Server, SQLite, PostgreSQL)
+            if (ex.InnerException != null && ex.InnerException.Message.ToLower().Contains("unique"))
+            {
+                return (false, true);
+            }
+            return (false, false);
+        }
+        catch
+        {
+            return (false, false);
         }
     }
     public async Task<User?> UpdateUser(User user)
@@ -42,7 +51,7 @@ public class UserRepository : IUserRepository
             if (userDb is null)
                 return null;
 
-            // Apply incoming non-empty values to the database entity
+            // Aplica valores não-vazios recebidos à entidade do banco de dados
             if (!string.IsNullOrWhiteSpace(user.Email))
                 userDb.Email = user.Email;
             if (!string.IsNullOrWhiteSpace(user.PasswordHash))

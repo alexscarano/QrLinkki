@@ -14,12 +14,27 @@ namespace QrLinkki.Api.Extensions
     {
         public static WebApplicationBuilder AddDbContext(this WebApplicationBuilder builder)
         {
-            builder.Services.AddDbContext<AppDbContext>
-            (options =>
-                options.UseSqlite(
-                    builder.Configuration.GetConnectionString("SqlLiteConnection"))
-            );
+            var defaultConnection = builder.Configuration.GetConnectionString("DefaultConnection");
+            var sqliteConnection = builder.Configuration.GetConnectionString("SqlLiteConnection");
 
+            if (!string.IsNullOrWhiteSpace(defaultConnection))
+            {
+                Console.WriteLine($"[Database] Using SQL Server (DefaultConnection).");
+                builder.Services.AddDbContext<AppDbContext>(options =>
+                    options.UseSqlServer(defaultConnection)
+                );
+            }
+            else if (!string.IsNullOrWhiteSpace(sqliteConnection))
+            {
+                Console.WriteLine($"[Database] Using SQLite (SqlLiteConnection).");
+                builder.Services.AddDbContext<AppDbContext>(options =>
+                    options.UseSqlite(sqliteConnection)
+                );
+            }
+            else
+            {
+                throw new InvalidOperationException("No valid database connection string found. Please configure 'DefaultConnection' (SQL Server) or 'SqlLiteConnection' (SQLite).");
+            }
 
             return builder;
         }
@@ -28,22 +43,43 @@ namespace QrLinkki.Api.Extensions
         {
             builder.Services.AddHttpContextAccessor();
             
-            // Allow CORS for local development (expo/web/dev servers)
+            // Configura CORS baseado no ambiente
             builder.Services.AddCors(options =>
             {
-                options.AddPolicy("AllowDev", policy =>
+                var origins = builder.Configuration.GetSection("Cors:AllowedOrigins").Get<string[]>();
+                
+                if (builder.Environment.IsProduction())
                 {
-                    policy.WithOrigins(
-                        "http://localhost:19006", // expo web
-                        "http://localhost:19000", // expo dev default
-                        "http://localhost:8081",  // expo metro web server (common)
-                        "http://localhost:3000",  // common web dev
-                        "http://localhost:5000"   // backend (if accessed directly)
-                    )
-                    .AllowAnyHeader()
-                    .AllowAnyMethod()
-                    .AllowCredentials();
-                });
+                    // Em produção, requer configuração explícita de origens
+                    if (origins == null || origins.Length == 0)
+                    {
+                        throw new InvalidOperationException("Configuration 'Cors:AllowedOrigins' must be provided in production. No default origins are allowed for security.");
+                    }
+                    
+                    options.AddPolicy("AllowDev", policy =>
+                    {
+                        policy.WithOrigins(origins)
+                              .AllowAnyHeader()
+                              .AllowAnyMethod()
+                              .AllowCredentials();
+                    });
+                }
+                else
+                {
+                    // Em desenvolvimento, permite localhost por padrão se não configurado
+                    if (origins == null || origins.Length == 0)
+                    {
+                        throw new InvalidOperationException("Configuration 'Cors:AllowedOrigins' must be provided. No default origins are allowed.");
+                    }
+                    
+                    options.AddPolicy("AllowDev", policy =>
+                    {
+                        policy.WithOrigins(origins)
+                              .AllowAnyHeader()
+                              .AllowAnyMethod()
+                              .AllowCredentials();
+                    });
+                }
             });
 
             builder.Services.AddScoped<IQrCodeService, QrCodeService>(provider =>
@@ -51,7 +87,12 @@ namespace QrLinkki.Api.Extensions
                 var env = provider.GetRequiredService<IWebHostEnvironment>();
 
                 // se wwwroot não existir, cria automaticamente
-                var storagePath = Path.Combine(env.ContentRootPath, "Storage");
+                var storageRelative = builder.Configuration["Storage:Path"];
+                if (string.IsNullOrWhiteSpace(storageRelative))
+                {
+                    throw new InvalidOperationException("Configuration 'Storage:Path' must be provided. No default storage path is allowed.");
+                }
+                var storagePath = Path.Combine(env.ContentRootPath, storageRelative);
                 if (!Directory.Exists(storagePath))
                 {
                     Directory.CreateDirectory(storagePath);
@@ -68,9 +109,21 @@ namespace QrLinkki.Api.Extensions
 
                 var request = httpContextAccessor.HttpContext?.Request;
 
-                var baseUrl = request is not null
-                    ? $"{request.Scheme}://{request.Host}"
-                    : "https://localhost:5001";
+                string baseUrl;
+                if (request is not null)
+                {
+                    baseUrl = $"{request.Scheme}://{request.Host}";
+                }
+                else
+                {
+                    var configuredBase = builder.Configuration["App:BaseUrl"];
+                    if (string.IsNullOrWhiteSpace(configuredBase))
+                    {
+                        throw new InvalidOperationException("Configuration 'App:BaseUrl' must be provided when generating links outside of HTTP requests. No default base URL is allowed.");
+                    }
+
+                    baseUrl = configuredBase;
+                }
 
                 return new LinkService(linkRepository, QrCodeService, baseUrl);
             });
@@ -85,7 +138,7 @@ namespace QrLinkki.Api.Extensions
 
         public static WebApplicationBuilder AddSwagger(this WebApplicationBuilder builder)
         {
-            // Register the API explorer and Swagger generator
+            // Registra o API explorer e gerador do Swagger
             builder.Services.AddEndpointsApiExplorer();
             builder.Services.AddSwaggerGen(options =>
             {
@@ -126,7 +179,7 @@ namespace QrLinkki.Api.Extensions
                     }
                 });
 
-                // Attempt to include XML comments (if generated) to enrich endpoint documentation
+                // Tenta incluir comentários XML (se gerados) para enriquecer a documentação dos endpoints
                 try
                 {
                     var xmlFile = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
@@ -138,14 +191,14 @@ namespace QrLinkki.Api.Extensions
                 }
                 catch
                 {
-                    // Ignore XML comments loading failures; not critical
+                    // Ignora falhas ao carregar comentários XML; não é crítico
                     return;
                 }
 
-                // Tag actions by controller name when available, otherwise by first route segment.
+                // Tageia ações por nome do controller quando disponível, caso contrário pelo primeiro segmento da rota.
                 options.TagActionsBy(api =>
                 {
-                    // Prefer controller route value (for controllers)
+                    // Prefere o valor de rota do controller (para controllers)
                     var controller = api.ActionDescriptor?.RouteValues != null &&
                                      api.ActionDescriptor.RouteValues.TryGetValue("controller", out var c)
                                      ? c
@@ -153,7 +206,7 @@ namespace QrLinkki.Api.Extensions
 
                     if (!string.IsNullOrEmpty(controller))
                     {
-                        // Normalize common names to friendly tags
+                        // Normaliza nomes comuns para tags amigáveis
                         if (controller.Equals("Link", StringComparison.OrdinalIgnoreCase) ||
                             controller.Equals("Links", StringComparison.OrdinalIgnoreCase))
                             return new[] { "Links" };
@@ -165,7 +218,7 @@ namespace QrLinkki.Api.Extensions
                         return new[] { controller };
                     }
 
-                    // Fallback: use first segment of the relative path (for minimal APIs)
+                    // Fallback: usa primeiro segmento do caminho relativo (para minimal APIs)
                     var relativePath = api.RelativePath ?? string.Empty;
                     var firstSegment = relativePath.Split('/', StringSplitOptions.RemoveEmptyEntries).FirstOrDefault();
 
@@ -176,14 +229,14 @@ namespace QrLinkki.Api.Extensions
                         if (firstSegment.Equals("users", StringComparison.OrdinalIgnoreCase))
                             return new[] { "Users" };
 
-                        // Capitalize for display
+                        // Capitaliza para exibição
                         return new[] { char.ToUpperInvariant(firstSegment[0]) + firstSegment.Substring(1) };
                     }
 
                     return new[] { "Default" };
                 });
 
-                // Provide clearer operation ids for generated clients
+                // Fornece IDs de operação mais claros para clientes gerados
                 options.CustomOperationIds(api =>
                 {
                     var method = api.HttpMethod ?? "unknown";
@@ -198,7 +251,7 @@ namespace QrLinkki.Api.Extensions
     
         public static WebApplicationBuilder AddAuthentication(this WebApplicationBuilder builder)
         {
-            // Read secret from configuration and accept Base64 or plain text
+            // Lê secret da configuração e aceita Base64 ou texto simples
             var secretConfig = builder.Configuration["Jwt:authQrLinkki"];
             if (string.IsNullOrWhiteSpace(secretConfig))
                 throw new InvalidOperationException("JWT secret not configured at 'Jwt:authQrLinkki'.");
@@ -213,7 +266,7 @@ namespace QrLinkki.Api.Extensions
                 keyBytes = Encoding.UTF8.GetBytes(secretConfig);
             }
 
-            // Require key length > 256 bits (32 bytes)
+            // Requer comprimento de chave > 256 bits (32 bytes)
             if (keyBytes.Length * 8 <= 256)
                 throw new InvalidOperationException($"JWT secret too short: {keyBytes.Length * 8} bits. Must be greater than 256 bits.");
 
@@ -225,7 +278,8 @@ namespace QrLinkki.Api.Extensions
                 x.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
             }).AddJwtBearer(x =>
             {
-                x.RequireHttpsMetadata = false;
+                // Em produção, requer HTTPS para validação de metadados
+                x.RequireHttpsMetadata = builder.Environment.IsProduction();
                 x.SaveToken = true;
                 x.TokenValidationParameters = new Microsoft.IdentityModel.Tokens.TokenValidationParameters
                 {
@@ -251,7 +305,7 @@ namespace QrLinkki.Api.Extensions
                 };
             });
 
-            // Register authorization services as well and add 'Authenticated' policy
+            // Registra serviços de autorização também e adiciona política 'Authenticated'
             builder.Services.AddAuthorization(options =>
             {
                 options.AddPolicy("Authenticated", p => p.RequireAuthenticatedUser());

@@ -20,10 +20,10 @@
 
         public int UserId { get; set; }
 
-        // Navigation properties
+        // Propriedades de navegação
         public User? User { get; set; }
 
-        // Method to register a click
+        // Método para registrar um clique
         public void RegisterClick()
         {
             Clicks++;

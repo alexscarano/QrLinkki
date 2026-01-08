@@ -57,7 +57,14 @@ export default function Register() {
       toast.show('success', 'Usuário criado. Faça login.');
       router.replace('/login');
     } catch (err: any) {
-      toast.show('error', err?.message ?? String(err));
+      // Erro amigável para email já cadastrado (409)
+      if (err?.message && (err.message.includes('409') || err.message.toLowerCase().includes('already'))) {
+        toast.show('error', 'Este email já está cadastrado. Faça login ou recupere sua senha.');
+      } else if (err?.message && err.message.toLowerCase().includes('network')) {
+        toast.show('error', 'Não foi possível conectar. Verifique sua internet.');
+      } else {
+        toast.show('error', 'Erro ao criar conta. Verifique os dados e tente novamente.');
+      }
     } finally {
       setLoading(false);
     }

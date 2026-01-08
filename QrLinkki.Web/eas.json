@@ -3,17 +3,25 @@
     "development": {
       "distribution": "internal",
       "developmentClient": true,
-      "android": { "buildType": "apk" }
+      "android": {
+        "buildType": "apk"
+      }
     },
     "preview": {
-      "distribution": "internal"
+      "distribution": "internal",
+      "android": {
+        "buildType": "apk"
+      }
     },
     "production": {
-      "android": { "buildType": "app-bundle" }
-    }
-    ,
+      "android": {
+        "buildType": "apk"
+      }
+    },
     "production-apk": {
-      "android": { "buildType": "apk" }
+      "android": {
+        "buildType": "apk"
+      }
     }
   }
 }

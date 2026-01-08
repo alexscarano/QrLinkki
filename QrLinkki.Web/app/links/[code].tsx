@@ -2,6 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { Image, ScrollView, StyleSheet, View, Text, Platform, TouchableOpacity, Dimensions, Linking } from 'react-native';
 import { useToast } from '@/components/ui/Toast';
 import { useRouter, useLocalSearchParams } from 'expo-router';
+import * as Clipboard from 'expo-clipboard';
 
 import { ThemedText } from '@/components/themed-text';
 import { useColorScheme } from '@/hooks/use-color-scheme';
@@ -110,13 +111,8 @@ export default function LinkDetail() {
     try {
       const toCopy = link?.complete_shortened_url ?? link?.original_url ?? '';
       if (!toCopy) return toast.show('error', 'Nada para copiar');
-      if (typeof navigator !== 'undefined' && (navigator as any).clipboard && (navigator as any).clipboard.writeText) {
-        await (navigator as any).clipboard.writeText(toCopy);
-        toast.show('success', 'Copiado para a área de transferência');
-      } else {
-        // clipboard API not available (likely native). Inform the user.
-        toast.show('error', 'Clipboard não disponível nesta plataforma');
-      }
+      await Clipboard.setStringAsync(toCopy);
+      toast.show('success', 'Copiado para a área de transferência');
     } catch (e) {
       toast.show('error', 'Não foi possível copiar');
     }
@@ -128,15 +124,15 @@ export default function LinkDetail() {
   return (
     <ScrollView style={{ backgroundColor: theme.authBackground }} contentContainerStyle={{ padding: 16 }}>
 
-      {/* use plain View to avoid injecting themed background blocks */}
+      {/* usar View simples para evitar injetar blocos de background com tema */}
       <View style={{ backgroundColor: 'transparent' }}>
         <ThemedText type="title">Detalhes</ThemedText>
 
-  {/* removed dark band under title for cleaner look */}
+        {/* removida banda escura sob o título para visual mais limpo */}
 
         {link ? (
           <View style={{ marginTop: 8, marginBottom: 8, flexDirection: 'row', alignItems: 'center' }}>
-            <View style={[styles.codePill, { borderColor: theme.authAccent, backgroundColor: theme.authAccent }]}> 
+            <View style={[styles.codePill, { borderColor: theme.authAccent, backgroundColor: theme.authAccent }]}>
               <Text style={[styles.codePillText, { color: theme.authButtonText }]}>{link.shortened_code ?? code}</Text>
             </View>
           </View>
@@ -152,7 +148,7 @@ export default function LinkDetail() {
               <View style={styles.qrWrap}>
                 <Image
                   source={{ uri: `data:image/png;base64,${link.qr_base64}` }}
-                  // responsive size based on viewport
+                  // tamanho responsivo baseado no viewport
                   style={[styles.qrImage, { width: Math.min(320, Math.round(Dimensions.get('window').width * 0.72)), height: Math.min(320, Math.round(Dimensions.get('window').width * 0.72)) }]}
                 />
               </View>
@@ -169,23 +165,23 @@ export default function LinkDetail() {
 
             <View style={{ marginTop: 12 }}>
               <TouchableOpacity style={[styles.primaryButtonFull, { backgroundColor: theme.authAccent }]} onPress={() => router.push(`/links/${code}/edit` as any)}>
-                  <Text style={[styles.primaryButtonText, { color: theme.authButtonText }]}>EDITAR</Text>
-                </TouchableOpacity>
+                <Text style={[styles.primaryButtonText, { color: theme.authButtonText }]}>EDITAR</Text>
+              </TouchableOpacity>
             </View>
-              <View style={{ marginTop: 10 }}>
-                <TouchableOpacity style={[styles.ghostButtonFull, { borderColor: theme.authAccent }]} onPress={handleDeleteConfirm}>
-                  <Text style={[styles.ghostButtonText, { color: theme.authAccent }]}>DELETAR</Text>
-                </TouchableOpacity>
-              </View>
-              <ConfirmModal
-                visible={confirmVisible}
-                title="Confirmação"
-                message="Tem certeza que deseja deletar este link?"
-                confirmLabel="Deletar"
-                cancelLabel="Cancelar"
-                onCancel={() => setConfirmVisible(false)}
-                onConfirm={() => { void doDelete(); }}
-              />
+            <View style={{ marginTop: 10 }}>
+              <TouchableOpacity style={[styles.ghostButtonFull, { borderColor: theme.authAccent }]} onPress={handleDeleteConfirm}>
+                <Text style={[styles.ghostButtonText, { color: theme.authAccent }]}>DELETAR</Text>
+              </TouchableOpacity>
+            </View>
+            <ConfirmModal
+              visible={confirmVisible}
+              title="Confirmação"
+              message="Tem certeza que deseja deletar este link?"
+              confirmLabel="Deletar"
+              cancelLabel="Cancelar"
+              onCancel={() => setConfirmVisible(false)}
+              onConfirm={() => { void doDelete(); }}
+            />
           </View>
         ) : (
           <ThemedText>Carregando...</ThemedText>
@@ -208,7 +204,7 @@ const styles = StyleSheet.create({
   originalUrl: { fontSize: 14 },
   shortUrl: { fontSize: 18, fontWeight: '700' },
   qrWrap: { alignSelf: 'center', backgroundColor: '#fff', padding: 12, borderRadius: 8, marginTop: 12 },
-  qrImage: { width: 200, height: 200 },
+  qrImage: { width: '100%', height: undefined, aspectRatio: 1 },
   primaryButton: { paddingVertical: 10, paddingHorizontal: 12, borderRadius: 8, alignItems: 'center' },
   primaryButtonText: { fontWeight: '700' },
   primaryButtonFull: { paddingVertical: 12, borderRadius: 10, alignItems: 'center', width: '100%' },

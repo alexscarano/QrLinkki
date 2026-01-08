@@ -15,6 +15,12 @@ type ToastContextType = {
 
 const ToastContext = createContext<ToastContextType | null>(null);
 
+// Helper global de toast para código fora de componentes exibir toasts. O
+// provider atribuirá a implementação real quando for montado.
+export const toast: { show: (type: ToastType, message: string, ttl?: number) => void } = {
+  show: () => { },
+};
+
 export function useToast() {
   const ctx = useContext(ToastContext);
   if (!ctx) throw new Error('useToast must be used within ToastProvider');
@@ -33,10 +39,21 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
     }, ttl);
   }, []);
 
+  // Expõe o `show` do provider ao helper global para que código fora do
+  // React (por exemplo a camada de API) possa exibir toasts. Mantemos
+  // esta atribuição em um effect para garantir que atualize se `show`
+  // mudar e para limpar desmontagem.
+  useEffect(() => {
+    toast.show = show;
+    return () => {
+      toast.show = () => { };
+    };
+  }, [show]);
+
   return (
     <ToastContext.Provider value={{ show }}>
-  {children}
-  {/* Renderizar sobreposição de toasts */}
+      {children}
+      {/* Renderizar sobreposição de toasts */}
       <View pointerEvents="box-none" style={styles.container}>
         {toasts.map((t) => (
           <Toast key={t.id} type={t.type} message={t.message} />

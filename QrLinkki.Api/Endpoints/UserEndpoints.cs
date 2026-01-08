@@ -9,7 +9,7 @@ public static class UserEndpoints
 {
     public static WebApplication MapUserEndpoints(this WebApplication app)
     {
-        // Allow owners to fetch their own profile. Require authentication and ownership.
+        // Permite que os proprietários busquem seu próprio perfil. Requer autenticação e propriedade.
         app.MapGet("/api/users/{user_id}", async (IUserService service, int user_id, HttpContext http) =>
         {
             var userIdClaim = http.User.FindFirst(ClaimTypes.Name)?.Value;
@@ -49,15 +49,16 @@ public static class UserEndpoints
         app.MapPost("/api/users", async (IUserService service, UserDto userDto) =>
         {
             var user = userDto.ToEntity();
-
-            var created = await service.CreateUser(user);
-         
+            var (created, duplicate) = await service.CreateUser(user);
+            if (duplicate)
+            {
+                return Results.Conflict("Email já cadastrado.");
+            }
             if (!created)
             {
                 return Results.BadRequest("Failed to create user.");
             }
             return Results.Created($"/api/users/{user.UserId}", user.ToDto());
-
         });
 
         app.MapPut("/api/users/{user_id}", async(IUserService service, int user_id, UserDto userDto, HttpContext http) =>
@@ -88,7 +89,7 @@ public static class UserEndpoints
         })
         .RequireAuthorization("Authenticated");
 
-        // Only the owner may delete their account
+        // Apenas o proprietario pode deletar sua conta
         app.MapDelete("/api/users/{user_id}", async (IUserService service, int user_id, HttpContext http) =>
         {
             var userIdClaim = http.User.FindFirst(ClaimTypes.Name)?.Value;

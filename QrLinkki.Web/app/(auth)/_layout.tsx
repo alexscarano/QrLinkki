@@ -38,7 +38,7 @@ export default function AuthLayout() {
         if (token && !isTokenExpired(token)) {
           // se o usuário já estiver logado, define o token e redireciona para a raiz do app
           api.setToken(token);
-          if (mounted) router.replace('/');
+          if (mounted) router.replace('/dashboard');
           return;
         }
 

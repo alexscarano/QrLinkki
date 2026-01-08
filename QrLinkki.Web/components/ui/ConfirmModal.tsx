@@ -30,7 +30,7 @@ export default function ConfirmModal({
             <TouchableOpacity onPress={onCancel} style={[styles.modalBtn, styles.modalCancel]}>
               <Text style={styles.modalCancelText}>{cancelLabel}</Text>
             </TouchableOpacity>
-            <TouchableOpacity onPress={onConfirm} style={[styles.modalBtn, styles.modalConfirm]}>
+            <TouchableOpacity onPress={() => { console.debug('ConfirmModal:button-pressed'); onConfirm(); }} style={[styles.modalBtn, styles.modalConfirm]}>
               <Text style={[styles.modalConfirmText]}>{confirmLabel}</Text>
             </TouchableOpacity>
           </View>

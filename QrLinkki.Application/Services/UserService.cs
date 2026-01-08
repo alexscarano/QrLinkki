@@ -21,7 +21,7 @@ public class UserService : IUserService
     public async Task<IEnumerable<User>?> GetUsers()
         => await _userRepository.GetUsers();
 
-    public async Task<bool> CreateUser(User user)
+    public async Task<(bool Success, bool Duplicate)> CreateUser(User user)
     {
         if (user is null || string.IsNullOrWhiteSpace(user.Email) || string.IsNullOrWhiteSpace(user.PasswordHash))
         {

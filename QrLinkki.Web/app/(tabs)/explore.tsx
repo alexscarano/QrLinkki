@@ -1,5 +1,5 @@
 import { Image } from 'expo-image';
-import { Platform, StyleSheet } from 'react-native';
+import { Platform, StyleSheet, Dimensions } from 'react-native';
 
 import { Collapsible } from '@/components/ui/collapsible';
 import { ExternalLink } from '@/components/external-link';
@@ -10,12 +10,15 @@ import { IconSymbol } from '@/components/ui/icon-symbol';
 import { Fonts } from '@/constants/theme';
 
 export default function TabTwoScreen() {
+  const windowW = Dimensions.get('window').width;
+  const headerSize = Math.min(320, Math.round(windowW * 0.9));
+  const smallImg = Math.min(120, Math.round(windowW * 0.28));
   return (
     <ParallaxScrollView
       headerBackgroundColor={{ light: '#D0D0D0', dark: '#353636' }}
       headerImage={
         <IconSymbol
-          size={310}
+          size={headerSize}
           color="#808080"
           name="chevron.left.forwardslash.chevron.right"
           style={styles.headerImage}
@@ -60,7 +63,8 @@ export default function TabTwoScreen() {
         <Image
           // Use relative path to a static image inside `assets` so Metro can resolve it.
           source={require('../../assets/android/res/mipmap-xxxhdpi/ic_launcher.png')}
-          style={{ width: 100, height: 100, alignSelf: 'center' }}
+          style={{ width: smallImg, height: smallImg, alignSelf: 'center' }}
+          contentFit="contain"
         />
         <ExternalLink href="https://reactnative.dev/docs/images">
           <ThemedText type="link">Learn more</ThemedText>
@@ -108,6 +112,6 @@ const styles = StyleSheet.create({
   },
   titleContainer: {
     flexDirection: 'row',
-    // gap not supported cross-platform; use margins on children if needed
+    // gap não tem suporte cross-platform; use margens nos filhos se necessário
   },
 });

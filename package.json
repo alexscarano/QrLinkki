@@ -1,0 +1,24 @@
+{
+  "name": "qrlinkki-root",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Root package.json for QrLinkki project - redirects to QrLinkki.Web",
+  "scripts": {
+    "dev:android": "cd QrLinkki.Web && npm run dev:android",
+    "dev:android:clear": "cd QrLinkki.Web && npm run dev:android:clear",
+    "dev:android:logs": "cd QrLinkki.Web && npm run dev:android:logs",
+    "dev:android:full": "cd QrLinkki.Web && npm run dev:android:full",
+    "start:dev": "cd QrLinkki.Web && npm run start:dev",
+    "start:clear": "cd QrLinkki.Web && npm run start:clear",
+    "android": "cd QrLinkki.Web && npm run android",
+    "android:dev": "cd QrLinkki.Web && npm run android:dev",
+    "android:logs": "cd QrLinkki.Web && npm run android:logs",
+    "build:android:release": "cd QrLinkki.Web && npm run build:android:release",
+    "build:android:dev": "cd QrLinkki.Web && npm run build:android:dev",
+    "build:android:staging": "cd QrLinkki.Web && npm run build:android:staging",
+    "web": "cd QrLinkki.Web && npm run web",
+    "lint": "cd QrLinkki.Web && npm run lint",
+    "lint:fix": "cd QrLinkki.Web && npm run lint:fix",
+    "type-check": "cd QrLinkki.Web && npm run type-check"
+  }
+}

@@ -9,8 +9,9 @@ namespace QrLinkki.Application.DTOS.Mappers
         {
             return new UserDto
             {
+                user_id = user.UserId,
                 email = user.Email,
-                password = string.Empty, // never expose password back
+                password = string.Empty, // nunca expor a senha de volta
                 created_at = user.CreatedAt,
                 updated_at = user.UpdatedAt,
             };
@@ -18,13 +19,19 @@ namespace QrLinkki.Application.DTOS.Mappers
 
         public static User ToEntity(this UserDto userDto)
         {
-            return new User
+            var user = new User
             {
                 Email = userDto.email,
-                PasswordHash = userDto.password.HashPassword(),
                 CreatedAt = userDto.created_at,
                 UpdatedAt = userDto.updated_at
             };
+
+            if (!string.IsNullOrWhiteSpace(userDto.password))
+            {
+                user.PasswordHash = userDto.password.HashPassword();
+            }
+
+            return user;
         }
     }
 }

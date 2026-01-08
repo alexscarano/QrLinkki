@@ -1,6 +1,7 @@
 import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { FlatList, Pressable, StyleSheet, View, Linking, ActivityIndicator, TouchableOpacity, Text, TextInput, Platform, ScrollView } from 'react-native';
 import { Link, useRouter } from 'expo-router';
+import * as Clipboard from 'expo-clipboard';
 import { useFocusEffect } from '@react-navigation/native';
 
 import { ThemedText } from '@/components/themed-text';
@@ -29,16 +30,16 @@ export default function Dashboard() {
   const [confirmVisible, setConfirmVisible] = useState(false);
   const [confirmItem, setConfirmItem] = useState<any | null>(null);
 
-  // Subscribe to header-triggered refresh events
+  // Inscrever-se em eventos de refresh disparados pelo header
   useEffect(() => {
     const unsub = subscribeRefresh(() => {
-      // header-triggered refresh should use the pull-to-refresh spinner
+      // refresh disparado pelo header deve usar o spinner de pull-to-refresh
       void refresh(false);
     });
     return unsub;
   }, []);
 
-  // Refresh when the screen receives focus (covers returning from create/edit/detail)
+  // Atualizar quando a tela receber foco (cobre retorno de create/edit/detail)
   useFocusEffect(
     useCallback(() => {
       refresh();
@@ -53,8 +54,8 @@ export default function Dashboard() {
     } catch (err) {
       console.error(err);
       const msg = String(err ?? '');
-      // If the token was invalid/expired the backend returns 401. Handle it gracefully
-      // by clearing storage/token and redirecting to login so we don't trigger the dev error overlay.
+      // Se o token era inválido/expirado o backend retorna 401. Trata graciosamente
+      // limpando storage/token e redirecionando para login para não disparar o overlay de erro de dev.
       if (msg.includes('401')) {
         try {
           await removeTokenStorage();
@@ -86,7 +87,7 @@ export default function Dashboard() {
     try {
       if (!v) return '';
       const d = typeof v === 'string' ? new Date(v) : new Date(v);
-      // show date and hour:minute (no seconds)
+      // mostra data e hora:minuto (sem segundos)
       return d.toLocaleString([], { year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit' });
     } catch (e) {
       return String(v);
@@ -107,18 +108,14 @@ export default function Dashboard() {
     }
   }
 
-  // logout is now handled by the DashboardHeader; keep removeTokenStorage import for refresh 401 handling
+  // logout agora é tratado pelo DashboardHeader; manter import removeTokenStorage para tratamento de 401 no refresh
 
   async function handleCopy(text?: string) {
     try {
       const toCopy = String(text ?? '');
       if (!toCopy) return toast.show('error', 'Nada para copiar');
-      if (typeof navigator !== 'undefined' && (navigator as any).clipboard && (navigator as any).clipboard.writeText) {
-        await (navigator as any).clipboard.writeText(toCopy);
-        toast.show('success', 'Copiado para a área de transferência');
-      } else {
-        toast.show('info', 'Cópia não suportada nesta plataforma');
-      }
+      await Clipboard.setStringAsync(toCopy);
+      toast.show('success', 'Copiado para a área de transferência');
     } catch (e) {
       toast.show('error', 'Não foi possível copiar');
     }
@@ -129,7 +126,7 @@ export default function Dashboard() {
     try {
       await api.deleteLink(String(code));
       toast.show('success', 'Deletado');
-      // refresh list after delete
+      // atualiza lista após delete
       void refresh();
     } catch (err) {
       const msg = String(err ?? '');
@@ -160,7 +157,7 @@ export default function Dashboard() {
           </View>
 
           <View style={styles.actionRow}>
-            {/* In-page action buttons moved to header for a more compact mobile layout */}
+            {/* Botões de ação dentro da página movidos para o header para um layout mobile mais compacto */}
           </View>
         </View>
 
@@ -203,34 +200,34 @@ export default function Dashboard() {
                     </TouchableOpacity>
                   </View>
                   <View style={styles.metaRow}>
-                        <View style={styles.codeRow}>
-                          <View style={[styles.codePill, { borderColor: theme.authAccent, backgroundColor: theme.authAccent }]}> 
-                            <Text style={[styles.codePillText, { color: theme.authButtonText }]}>{item.shortened_code}</Text>
-                          </View>
-                          <ThemedText type="default" style={{ marginLeft: 8, color: '#fff' }}>{formatDate(item.created_at)}</ThemedText>
-                        </View>
+                    <View style={styles.codeRow}>
+                      <View style={[styles.codePill, { borderColor: theme.authAccent, backgroundColor: theme.authAccent }]}>
+                        <Text style={[styles.codePillText, { color: theme.authButtonText }]}>{item.shortened_code}</Text>
+                      </View>
+                      <ThemedText type="default" style={{ marginLeft: 8, color: '#fff' }}>{formatDate(item.created_at)}</ThemedText>
+                    </View>
                   </View>
 
-                  {/* Clicks shown in a compact row below the shortened URL for cleaner UI */}
+                  {/* Cliques exibidos em uma linha compacta abaixo da URL encurtada para UI mais limpa */}
                   <View style={styles.clickRow}>
-                    <View style={[styles.clickPill, { borderColor: theme.authAccent, backgroundColor: theme.authAccent }]}> 
+                    <View style={[styles.clickPill, { borderColor: theme.authAccent, backgroundColor: theme.authAccent }]}>
                       <Text style={[styles.clickPillText, { color: theme.authButtonText }]}>{String(item.click ?? 0)}</Text>
                     </View>
                     <ThemedText type="default" style={{ marginLeft: 8, color: '#9ad1ef' }}>Cliques</ThemedText>
                   </View>
                 </View>
 
-                  <View style={[styles.rowActionsRight, { marginTop: 16 }]}> 
-                    <TouchableOpacity style={[styles.smallButton, { backgroundColor: theme.authAccent }]} onPress={() => handleOpen(item)}>
-                      <Text style={[styles.smallButtonText, { color: theme.authButtonText }]}>Abrir</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={[styles.smallButtonOutline, { borderColor: theme.authAccent, marginTop: 8 }]} onPress={() => router.push((`/links/${item.shortened_code || item.linkId}`) as any)}>
-                      <Text style={[styles.smallButtonOutlineText, { color: theme.authAccent }]}>Detalhes</Text>
-                    </TouchableOpacity>
-                    <TouchableOpacity style={[styles.smallButtonOutline, { borderColor: '#ff6b6b', marginTop: 8 }]} onPress={() => handleDeleteConfirm(item)}>
-                      <Text style={[styles.smallButtonOutlineText, { color: '#ff6b6b' }]}>Deletar</Text>
-                    </TouchableOpacity>
-                  </View>
+                <View style={[styles.rowActionsRight, { marginTop: 16 }]}>
+                  <TouchableOpacity style={[styles.smallButton, { backgroundColor: theme.authAccent }]} onPress={() => handleOpen(item)}>
+                    <Text style={[styles.smallButtonText, { color: theme.authButtonText }]}>Abrir</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={[styles.smallButtonOutline, { borderColor: theme.authAccent, marginTop: 8 }]} onPress={() => router.push((`/links/${item.shortened_code || item.linkId}`) as any)}>
+                    <Text style={[styles.smallButtonOutlineText, { color: theme.authAccent }]}>Detalhes</Text>
+                  </TouchableOpacity>
+                  <TouchableOpacity style={[styles.smallButtonOutline, { borderColor: '#ff6b6b', marginTop: 8 }]} onPress={() => handleDeleteConfirm(item)}>
+                    <Text style={[styles.smallButtonOutlineText, { color: '#ff6b6b' }]}>Deletar</Text>
+                  </TouchableOpacity>
+                </View>
               </Pressable>
             )}
             ItemSeparatorComponent={() => <View style={{ height: 12 }} />}
@@ -254,7 +251,7 @@ export default function Dashboard() {
 }
 
 const styles = StyleSheet.create({
-  // match auth screens (login/register/welcome) theme
+  // combina com o tema das telas de auth (login/register/welcome)
   safe: { flex: 1, backgroundColor: '#05141a' },
   container: { flex: 1, padding: 12 },
   headerRow: { flexDirection: 'row', justifyContent: 'space-between', alignItems: 'center' },
@@ -272,7 +269,7 @@ const styles = StyleSheet.create({
   rowCard: { flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between', padding: 12, borderRadius: 10, backgroundColor: '#07101a' },
   rowCardShadow: { shadowColor: '#000', shadowOffset: { width: 0, height: 2 }, shadowOpacity: 0.12, shadowRadius: 4, elevation: 2 },
   rowMain: { flex: 1, paddingRight: 12 },
-  // make original and shortened URL text the same size for visual parity
+  // deixa o texto da URL original e encurtada do mesmo tamanho para paridade visual
   rowTitle: { fontSize: 16 },
   rowSubtitle: { fontSize: 16, marginTop: 4 },
   metaRow: { flexDirection: 'row', flexWrap: 'wrap', marginTop: 8 },

@@ -90,7 +90,7 @@ public class LinkRepository : ILinkRepository
     {
         try
         {
-            var link = await GetLink(link_id);
+            var link = await GetLinkWithoutIncrement(link_id);
 
             if (link is null)
                 return false;
@@ -114,7 +114,7 @@ public class LinkRepository : ILinkRepository
             Link? linkDb = null;
 
             if (link.LinkId == 0)
-                linkDb = await GetLink(code);
+                linkDb = await GetLinkWithoutIncrement(code);
             else
                 linkDb = await _appDbContext.Links.FindAsync(link.LinkId);
 

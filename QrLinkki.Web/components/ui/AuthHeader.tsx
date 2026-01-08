@@ -20,17 +20,17 @@ export default function AuthHeader({ onBack, iconColor, textColor, showBack = tr
   const colorScheme = useColorScheme() ?? 'light';
   const theme = Colors[colorScheme ?? 'light'];
 
-  // valores padrão sensatos quando não fornecidos
+  // valores padrão sensíveis quando não fornecidos
   const resolvedIconColor = iconColor ?? theme.authAccent;
   const resolvedTextColor = textColor ?? theme.text;
 
   // Altura visível base do cabeçalho (excluindo o safe-area inset)
   const BASE_HEADER_HEIGHT = 44; // bom para a maioria dos dispositivos
 
-  // No Android, StatusBar.currentHeight pode importar; prefira safe-area insets quando disponíveis
+  // No Android, StatusBar.currentHeight pode ser importante; prefira safe-area insets quando disponíveis
   const insetTop = insets.top ?? (Platform.OS === 'android' ? StatusBar.currentHeight ?? 0 : 0);
 
-  // Se estivermos na web desktop, use um layout ligeiramente diferente
+  // Se estivermos na web desktop, usa um layout levemente diferente
   const isDesktopWeb = Platform.OS === 'web' && width >= 900;
 
   // O container é relativo para não sobrepor o conteúdo da página — mantém o layout simples
@@ -60,8 +60,8 @@ export default function AuthHeader({ onBack, iconColor, textColor, showBack = tr
     });
 
   return (
-    <View style={[containerStyle, { backgroundColor: theme.authBackground }]}> 
-  {/* alça superior sutil para polir visualmente */}
+    <View style={[containerStyle, { backgroundColor: theme.authBackground }]}>
+      {/* alça superior sutil para polir visualmente */}
       <View style={[styles.handle, { backgroundColor: 'rgba(0,0,0,0.06)' }]} />
 
       {showBack ? (
@@ -77,7 +77,7 @@ export default function AuthHeader({ onBack, iconColor, textColor, showBack = tr
         </TouchableOpacity>
       ) : null}
 
-  {/* sem título - apenas controle de voltar por design */}
+      {/* sem título - apenas controle de voltar por design */}
     </View>
   );
 }

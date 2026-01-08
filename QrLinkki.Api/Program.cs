@@ -1,17 +1,29 @@
 var builder = WebApplication.CreateBuilder(args);
 
-// Ensure the web host listens on a reachable interface during development.
-// Prefer an explicit ASPNETCORE_URLS environment variable if present, otherwise
-// fall back to listening on all interfaces (0.0.0.0) so other devices on the
-// LAN can reach the API when testing from Expo Go / a phone.
+// Configura URLs: suporta tanto Docker (variável de ambiente ASPNETCORE_URLS) quanto execução direta (parâmetro --urls)
+// Prioridade:
+//   1. Variável de ambiente ASPNETCORE_URLS (usada pelo Docker)
+//   2. Parâmetro de linha de comando --urls (parseado por WebApplication.CreateBuilder)
+//   3. Fallback padrão: escutar em todas as interfaces na porta 5000
 var urlsEnv = Environment.GetEnvironmentVariable("ASPNETCORE_URLS");
 if (!string.IsNullOrEmpty(urlsEnv))
 {
+    // Definido explicitamente pela variável de ambiente (cenário Docker)
     builder.WebHost.UseUrls(urlsEnv);
+    Console.WriteLine($"[Config] Using ASPNETCORE_URLS: {urlsEnv}");
 }
-else if (builder.Environment.IsDevelopment())
+else if (!builder.Configuration.GetValue<string>("urls", null)?.Any() ?? true)
 {
-    builder.WebHost.UseUrls("http://0.0.0.0:5000");
+    // Sem variável de ambiente e sem parâmetro  --urls fornecido
+    // Fallback para escutar em todas as interfaces para suportar testes em LAN
+    var defaultUrls = "http://0.0.0.0:5000";
+    builder.WebHost.UseUrls(defaultUrls);
+    Console.WriteLine($"[Config] Using default URLs: {defaultUrls}");
+}
+else
+{
+    // Parâmetro --urls foi fornecido via linha de comando ou configuração
+    Console.WriteLine($"[Config] Using command-line URLs parameter");
 }
 
 builder.AddDbContext();
@@ -20,6 +32,26 @@ builder.AddSwagger();
 builder.AddAuthentication();
 
 var app = builder.Build();
+
+// Executa migrations automaticamente na inicialização
+using (var scope = app.Services.CreateScope())
+{
+    var dbContext = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+    try
+    {
+        dbContext.Database.Migrate();
+        Console.WriteLine("[Database] Migrations aplicadas com sucesso.");
+    }
+    catch (Exception ex)
+    {
+        Console.WriteLine($"[Database] Erro ao aplicar migrations: {ex.Message}");
+        // Em desenvolvimento, continua mesmo se falhar (pode ser que já esteja atualizado)
+        if (app.Environment.IsProduction())
+        {
+            throw;
+        }
+    }
+}
 
 app.HttpExtensions();
 app.MapLinksEndpoints();

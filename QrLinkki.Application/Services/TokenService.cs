@@ -20,7 +20,7 @@ namespace QrLinkki.Application.Services
                 throw new InvalidOperationException("JWT secret not configured at 'Jwt:authQrLinkki'.");
 
             byte[] key;
-            // Interpret secret as Base64 if possible, otherwise use UTF8 bytes
+            // Interpreta secret como Base64 se possível, caso contrário usa bytes UTF8
             try
             {
                 key = Convert.FromBase64String(secret);
@@ -30,7 +30,7 @@ namespace QrLinkki.Application.Services
                 key = Encoding.UTF8.GetBytes(secret);
             }
 
-            // Require key length > 256 bits (i.e., > 32 bytes)
+            // Requer comprimento de chave > 256 bits (ou seja, > 32 bytes)
             if (key.Length * 8 <= 256)
             {
                 throw new InvalidOperationException(

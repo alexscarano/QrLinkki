@@ -12,7 +12,7 @@
 
         public DateTime? UpdatedAt { get; set; }
 
-        // Navigation properties can be added here in the future
+        // Propriedades de navegação podem ser adicionadas aqui no futuro
         public ICollection<Link> Links { get; set; } = new List<Link>();
 
     }

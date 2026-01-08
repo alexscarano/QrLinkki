@@ -6,7 +6,7 @@ public static class LinkEndpoints
 {
     public static WebApplication MapLinksEndpoints(this WebApplication app)
     {
-        // Public redirect endpoint for shortened codes. This should be accessible without auth.
+        // Endpoint público de redirecionamento para códigos encurtados. Deve ser acessível sem autenticação.
         app.MapGet("/r/{code}", async (ILinkService service, string code) =>
         {
             var link = await service.GetLink(code);
@@ -16,7 +16,7 @@ public static class LinkEndpoints
                 return Results.NotFound();
             }
 
-            // Return an HTTP redirect to the original URL
+            // Retorna um redirect HTTP para a URL original
             return Results.Redirect(link.original_url);
         });
         
@@ -43,7 +43,7 @@ public static class LinkEndpoints
 
         app.MapGet("/api/links/{code}", async (ILinkService service, string code, HttpContext http) =>
         {
-            // Ensure caller is authenticated and is the owner of the link
+            // Garante que o chamador está autenticado e é o proprietário do link
             var userIdClaim = http.User.FindFirst(ClaimTypes.Name)?.Value;
 
             if (string.IsNullOrWhiteSpace(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
@@ -60,7 +60,7 @@ public static class LinkEndpoints
 
             if (link.user_id != userId)
             {
-                // Don't allow users to fetch links they don't own
+                // Não permite que usuários busquem links que não possuem
                 return Results.Forbid();
             }
 
@@ -70,10 +70,10 @@ public static class LinkEndpoints
 
         app.MapPost("/api/links", async (ILinkService service, LinkDto linkDto, HttpContext http) =>
         {
-            // Map DTO to entity
+            // Mapeia DTO para entidade
             var link = linkDto.ToEntity();
 
-            // Extract user id from JWT claim (we used ClaimTypes.Name to store user id)
+            // Extrai user id do claim JWT (usamos ClaimTypes.Name para armazenar o user id)
             var userIdClaim = http.User.FindFirst(ClaimTypes.Name)?.Value;
 
             if (string.IsNullOrWhiteSpace(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
@@ -91,7 +91,7 @@ public static class LinkEndpoints
 
         app.MapPut("/api/links/{code}", async (ILinkService service, string code, LinkDto linkDto, HttpContext http) =>
         {
-            // Ensure the caller is authenticated and is the owner of the link before updating
+            // Garante que o chamador está autenticado e é o proprietário do link antes de atualizar
             var userIdClaim = http.User.FindFirst(ClaimTypes.Name)?.Value;
 
             if (string.IsNullOrWhiteSpace(userIdClaim) || !int.TryParse(userIdClaim, out var userId))
@@ -111,7 +111,7 @@ public static class LinkEndpoints
             }
 
             var link = linkDto.ToEntity();
-            link.UserId = userId; // enforce ownership
+            link.UserId = userId; // força propriedade
 
             var updatedLink = await service.UpdateLink(link, code);
             if (updatedLink is null)
@@ -124,7 +124,7 @@ public static class LinkEndpoints
 
         app.MapDelete("/api/links/{code}", async (ILinkService service, string code, HttpContext http) =>
         {
-            // Ensure caller is authenticated and owner
+            // Garante que o chamador está autenticado e é o proprietário
             var userIdClaim = http.User.FindFirst(ClaimTypes.Name)?.Value;
 
             if (string.IsNullOrWhiteSpace(userIdClaim) || !int.TryParse(userIdClaim, out var userId))

@@ -1,147 +1,341 @@
+
 # QrLinkki
 
-## Descrição
+<div align="center">
+  <img src="assets/logo-removebg.png" alt="QrLinkki Logo" width="200" />
+</div>
 
-QrLinkki é um projeto em C# com arquitetura baseada em camadas (Domain Driven Design) destinado à geração e gerenciamento de QR Codes e links curtos (URL shortener). Organizado para escalabilidade, manutenibilidade e separação clara de responsabilidades, o sistema permite criar, associar, consultar e rastrear links encurtados e seus respectivos QR Codes, gerando estatísticas e facilitando o acesso.
+### Plataforma Moderna de Geração de QR Codes e Encurtador de URLs
 
-## Estrutura do Projeto
+[![.NET](https://img.shields.io/badge/.NET-8.0-512BD4?style=for-the-badge&logo=dotnet&logoColor=white)](https://dotnet.microsoft.com/)
+[![Android](https://img.shields.io/badge/Android-3DDC84?style=for-the-badge&logo=android&logoColor=white)](https://www.android.com/)
+[![React Native](https://img.shields.io/badge/React_Native-0.81-61DAFB?style=for-the-badge&logo=react&logoColor=black)](https://reactnative.dev/)
+[![Expo](https://img.shields.io/badge/Expo-54.0-000020?style=for-the-badge&logo=expo&logoColor=white)](https://expo.dev/)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?style=for-the-badge&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Licença](https://img.shields.io/badge/Licença-MIT-green.svg?style=for-the-badge)](LICENSE)
 
-- **QrLinkki.Api**  
-  Camada de apresentação para expor rotas HTTP (controllers da API REST).
-- **QrLinkki.Application**  
-  Lógica de aplicação, orquestração dos casos de uso principais.
-- **QrLinkki.Domain**  
-  Entidades, regras de negócio e interfaces do domínio (DDD).
-- **QrLinkki.Infrastructure**  
-  Persistência de dados, acesso a serviços externos, storage, migrações.
+**QrLinkki** é uma plataforma full-stack para criar, gerenciar e rastrear QR codes e URLs encurtadas, com foco em uma experiência nativa para **Android**. Construída com princípios de **Domain-Driven Design**.
 
-## Funcionalidades atuais
+[Funcionalidades](#-funcionalidades) • [Como Rodar](#-como-rodar-o-projeto) • [Stack Tecnológica](#-stack-tecnológica)
 
-- Gerar QR Codes a partir de URLs ou textos
-- Persistência e consulta dos QR Codes gerados
-- Encaminhamento transparente para links associados aos QR Codes
-- Regras de validade, expiração e ativação de links encurtados
-- Cadastro, consulta, atualização e remoção de usuários
-- Verificação de existência de usuário por e-mail
-- Criação, atualização/remoção de links seguros e associados ao usuário
-- Geração automática de códigos curtos (shortcode) para URLs e sua URL encurtada completa
-- Recuperação de todos os links do usuário autenticado
-- Registro de cliques em links, incluindo IP e device de acesso
-- Suporte à autenticação JWT (JSON Web Token)
-- Migração automatizada do banco de dados para criação/manutenção de tabelas
-- Consultas por email ou ID, DTOs, mapeamento entre entidades e responses seguras
-- Endpoints RESTful para todas entidades principais (Users, Links)
-- Documentação automática de endpoints via Swagger
+</div>
 
-## Como rodar
+---
+
+## ✨ Funcionalidades
+
+### 🎯 Funcionalidades Principais
+- **Geração de QR Codes** — Crie QR codes dinâmicos a partir de qualquer URL ou texto
+- **Encurtamento de URLs** — Gere links curtos e memoráveis com códigos personalizados
+- **Contagem de Cliques** — Visualize quantos acessos seus links tiveram
+- **Gerenciamento de Usuários** — Autenticação segura com tokens JWT
+- **Redirecionamentos Públicos** — Redirecionamento transparente a partir de URLs curtas
+
+### 📱 Aplicativo
+- **Android Nativo** — Desenvolvido e otimizado especificamente para o ecossistema Android
+- **Scanner de QR** — Scanner de câmera integrado para QR codes
+- **Dashboard** — Gerencie todos os seus links em um só lugar
+- **Design Moderno** — Interface visualmente agradável
+- **Suporte Offline** — Cache local para melhor performance
+
+> [!NOTE]
+> **Compatibilidade:** Este projeto foi desenvolvido e testado exclusivamente em dispositivos **Android**. Embora utilize React Native, o funcionamento em iOS ou Web não foi verificado e pode exigir adaptações.
+
+### 🔒 Segurança
+- **Autenticação JWT** — Autenticação segura baseada em tokens
+- **Acesso Exclusivo do Proprietário** — Apenas donos dos links podem modificar seu conteúdo
+- **Proteção de Dados** — Armazenamento seguro de credenciais
+
+---
+
+## 🏗️ Arquitetura
+
+QrLinkki segue os princípios de **Clean Architecture** e **Domain-Driven Design**:
 
 ```
-dotnet restore
-dotnet build
-dotnet run --project QrLinkki.Api --urls="http://localhost:5000"
+┌─────────────────────────────────────────────────────────┐
+│                    QrLinkki.Api                         │
+│            (Camada de Apresentação / REST API)          │
+│          Controllers • Swagger • Autenticação           │
+└────────────────────┬────────────────────────────────────┘
+                     │
+┌────────────────────▼────────────────────────────────────┐
+│               QrLinkki.Application                      │
+│          (Camada de Aplicação / Casos de Uso)           │
+│        Services • DTOs • Orquestração de Negócios       │
+└────────────────────┬────────────────────────────────────┘
+                     │
+┌────────────────────▼────────────────────────────────────┐
+│                QrLinkki.Domain                          │
+│           (Camada de Domínio / Lógica Central)          │
+│         Entidades • Interfaces • Regras de Negócio      │
+└────────────────────┬────────────────────────────────────┘
+                     │
+┌────────────────────▼────────────────────────────────────┐
+│             QrLinkki.Infrastructure                     │
+│         (Camada de Infraestrutura / Acesso a Dados)     │
+│    EF Core • SQLite • Repositories • Migrations         │
+└─────────────────────────────────────────────────────────┘
 ```
-A aplicação irá expor a API localmente (tipicamente em `http://localhost:5000`).
 
-## Exemplo de endpoints
+### Arquitetura Frontend
 
-- `POST /api/users` — Cadastro de novo usuário
-- `GET /api/users/{user_id}` — Busca de usuário por ID
-- `GET /api/users` — Lista de usuários (autenticado)
-- `POST /api/links` — Criação de link encurtado com QR Code
-- `GET /api/links/{code}` — Consulta pelas informações do link usando o código curto
-- `DELETE /api/links/{code}` — Remoção de link
+```
+QrLinkki.Web/
+├── app/                    # Páginas do Expo Router
+│   ├── (auth)/            # Telas de autenticação
+│   ├── (tabs)/            # Telas de navegação em abas
+│   └── links/             # Telas de gerenciamento de links
+├── components/            # Componentes UI reutilizáveis
+├── lib/                   # Cliente API e utilitários
+├── hooks/                 # Hooks personalizados do React
+└── constants/             # Tokens de tema e configurações
+```
 
-## Contribuição
+---
 
-1. Forke o repositório
-2. Crie sua branch (`git checkout -b feature/nome`)
-3. Realize suas modificações
-4. Abra um Pull Request
+## 🚀 Stack Tecnológica
 
-## Frontend (Expo) — descrição e tecnologias
+### Backend
 
-O frontend foi construído com Expo (React Native para Web) e TypeScript que fornece a interface de usuário para criação, gerenciamento e visualização de links encurtados e QR Codes. Foi projetado para ser cross-platform (web e mobile), com foco em acessibilidade visual, usabilidade em dispositivos de toque e integração com a API backend via REST + JWT.
+| Tecnologia | Versão | Finalidade |
+|-----------|---------|---------|
+| **.NET** | 8.0 | Framework principal |
+| **ASP.NET Core** | 8.0 | Framework de API Web |
+| **Entity Framework Core** | 9.0 | ORM e acesso a banco de dados |
+| **SQLite** | - | Banco de dados embutido |
+| **JWT Bearer** | 8.0 | Autenticação |
+| **Swagger/OpenAPI** | 9.0 | Documentação da API |
 
-Estrutura do frontend (visão geral):
+### Frontend
 
-- `QrLinkki.Web/app/` — rotas/páginas principais (login, registro, dashboard, links, criação/edição de links, detalhes públicos).
-- `QrLinkki.Web/components/` — componentes reutilizáveis de UI (headers, cards, botões, ícones).
-- `QrLinkki.Web/constants/` — tokens de tema e configurações visuais (cores, espaçamentos).
-- `QrLinkki.Web/lib/` — utilitários e wrappers (API client, storage, helpers).
-- `QrLinkki.Web/hooks/` — hooks personalizados para estado e efeitos compartilhados.
-- `QrLinkki.Web/assets/` — imagens e ícones utilizados pela interface.
+| Tecnologia | Versão | Finalidade |
+|-----------|---------|---------|
+| **Expo** | ~54.0 | Framework mobile |
+| **React Native** | 0.81 | Framework de UI |
+| **React** | 19.1 | Biblioteca de UI |## 📱 Como Rodar o Projeto
 
-Principais tecnologias e decisões:
+Este projeto utiliza scripts PowerShell para facilitar o build e desenvolvimento Android.
 
-- Expo + expo-router para navegação e publicação multiplataforma.
-- TypeScript para segurança de tipos em tempo de desenvolvimento.
-- Theming e componentes compartilhados para manter consistência visual entre telas.
-- Uso de toasts e feedbacks visuais para ações como copiar para a área de transferência.
-- Estratégia de cabeçalho híbrida: cabeçalho nativo estilizado globalmente, com telas específicas em full-bleed quando necessário para fidelidade visual.
+### Pré-requisitos
+- Node.js
+- JDK 17 ou 21
+- Android Studio (para emulador/SDK)
 
-Funcionalidades do frontend (resumo):
+### Instalação
 
-- Autenticação (login/register) com restauração de token local (`qrlinkki_token`) e tratamento global de respostas 401 para logout/redirect.
-- Painel do usuário (dashboard) com listagem de links, ações rápidas (copiar, abrir, editar, deletar) e visual compacto das URLs.
-- Criação/edição de links com UI adaptada para mobile (inputs legíveis e botões full-width).
-- Página de detalhe de link (acesso controlado pelo proprietário) com QR responsivo, destaque do código e ações de usuário com feedback.
-- Cross-platform: atenção a estilos e propriedades compatíveis entre web e mobile; fallback para clipboard nativo quando necessário.
-
-Observação: o texto e o código do backend permaneceram inalterados — o README mantém a seção de backend exatamente como estava.
-
-## Créditos
-
-- Frontend desenvolvido por: Wpnnt (https://github.com/Wpnnt). O frontend inclui a interface web/mobile (Expo) com dashboard, criação/edição de links, geração de QR e integração JWT com o backend.
-
-## Notas de segurança e comportamento importante
-
-- Propriedade dos links: operações sensíveis (GET/PUT/DELETE em `/api/links/{code}` e ações de gerenciamento no painel) exigem autenticação e são verificadas no servidor para garantir que apenas o proprietário do link possa visualizar/editar/deletar.
-- Endpoints de usuário (GET/PUT/DELETE `/api/users/{user_id}`) também exigem autenticação e são validados para que apenas o próprio usuário possa alterar ou remover sua conta.
-- O endpoint público de redirecionamento curto `/r/{code}` permanece público por design — cada acesso público a esse caminho incrementa o contador de cliques. Se deseja que os shortlinks sejam privados, é necessário alterar esse comportamento (impacto: shortlinks/QR deixarão de funcionar publicamente).
-- O frontend lida com respostas 401/403: 401 dispara limpeza de sessão/redirect para login; 403 apresenta mensagem de acesso negado e redireciona ou oculta ações conforme apropriado.
-
-## Como rodar o frontend (Expo)
-
-Pré-requisitos rápidos:
-
-- Node.js (recomenda-se 16+ ou 18+)
-- npm ou yarn
-- (Opcional) Expo Go no celular para testar em dispositivo físico
-
-Passos (PowerShell / Windows):
-
-```powershell
-# vá para a pasta do frontend
+```bash
 cd QrLinkki.Web
-
-# instale dependências
 npm install
-
-# iniciar em modo web
-npm run web
-
-# ou iniciar o dev server (abre o Metro/DevTools - escolhe web/android/ios)
-npm start
-
-# abrir diretamente no Android (se configurado)
-npm run android
-
-# abrir no iOS (apenas em macOS)
-npm run ios
 ```
 
-Notas:
+### Desenvolvimento (Hot Reload)
 
-- `npm start` abre a interface do Expo (dev tools). A partir dela você pode escolher rodar para web, Android ou iOS.
-- Se preferir yarn: use `yarn` e `yarn web` / `yarn start`.
-- Certifique-se de que a API backend esteja rodando (por padrão em `http://localhost:5000`) para que o frontend consiga autenticar e consumir os endpoints.
+Para iniciar o servidor de desenvolvimento:
 
-Problemas comuns:
+```bash
+npm run dev:android
+```
 
-- Caso não consiga conectar ao backend, verifique se a API está em execução e se não há bloqueios de CORS/porta.
-- Em dispositivos móveis, ao usar Expo Go, assegure-se que o computador e o celular estejam na mesma rede.
+Se for a primeira vez rodando, ou se adicionou novas bibliotecas nativas, gere o cliente de desenvolvimento:
+
+```bash
+npm run build:android:dev
+```
+
+### Staging (Pré-Produção)
+
+Para gerar um APK de staging (instalável ao lado da versão de produção):
+
+```bash
+npm run build:android:staging
+```
+
+### Produção
+
+Para gerar o APK final:
+
+```bash
+npm run build:android:release
+```
+
+---
+
+## 📡 Endpoints da API
+
+### Autenticação e Usuários
+
+```http
+POST   /api/users              # Registrar novo usuário
+GET    /api/users              # Listar todos os usuários (autenticado)
+GET    /api/users/{id}         # Obter usuário por ID
+PUT    /api/users/{id}         # Atualizar usuário
+DELETE /api/users/{id}         # Deletar usuário
+```
+
+### Links e QR Codes
+
+```http
+POST   /api/links              # Criar link curto com QR code
+GET    /api/links              # Obter todos os links do usuário autenticado
+GET    /api/links/{code}       # Obter detalhes do link
+PUT    /api/links/{code}       # Atualizar link
+DELETE /api/links/{code}       # Deletar link
+GET    /r/{code}               # Redirecionamento público (rastreia cliques)
+```
+
+### 📚 Documentação Completa da API
+
+Quando a API estiver rodando, visite `http://localhost:5000/swagger` para documentação interativa da API.
+
+---
+
+## 📱 Funcionalidades do Frontend
+
+### Fluxo de Autenticação
+- Login/registro seguro com JWT
+- Atualização automática de token
+- Persistência de sessão com armazenamento seguro
+- Auto-logout em respostas 401
+
+### Dashboard
+- Visão geral visual dos links com estatísticas
+- Ações rápidas: copiar, compartilhar, editar, deletar
+- Rastreamento de cliques em tempo real
+- Layout em grid responsivo
+
+### Gerenciamento de Links
+- Criar códigos curtos personalizados
+- Gerar QR codes automaticamente
+- Definir datas de expiração
+- Habilitar/desabilitar links
+
+### Scanner de QR
+- Integração nativa com câmera
+- Detecção de QR code em tempo real
+- Redirecionamento automático ao escanear
+
+---
+
+## 🛠️ Desenvolvimento
+
+### Estrutura do Projeto
+
+```
+QrLinkki/
+├── QrLinkki.Api/              # Camada de API REST
+├── QrLinkki.Application/      # Camada de lógica de negócios
+├── QrLinkki.Domain/           # Entidades de domínio e interfaces
+├── QrLinkki.Infrastructure/   # Acesso a dados e serviços externos
+├── QrLinkki.Web/              # Aplicativo frontend Expo
+├── data/                      # Banco de dados SQLite
+├── api-storage/               # Uploads de arquivos e QR codes
+└── docker-compose.*.yml       # Configurações do Docker
+```
+
+### Executando Testes
+
+```bash
+# Testes do backend
+dotnet test
+
+# Testes do frontend (se configurado)
+cd QrLinkki.Web
+npm test
+```
+
+### Build para Produção
+
+```bash
+# Backend
+dotnet publish -c Release -o ./publish
+
+# Frontend (Android - usa Gradle)
+cd QrLinkki.Web
+npm run build:android:release
+```
+
+---
 
 
-## Licença
 
-[MIT](LICENSE)
+## 🐛 Solução de Problemas
+
+### Problemas Comuns
+
+**Backend não inicia:**
+- Certifique-se de que a porta 5000 não está em uso
+- Verifique se o .NET 8.0 SDK está instalado
+- Verifique as permissões do banco de dados na pasta `data/`
+
+**Frontend não conecta à API:**
+- Verifique se a API está rodando em `http://localhost:5000`
+- Verifique a configuração de CORS no backend
+- Em dispositivos móveis, certifique-se de que PC e celular estão na mesma rede
+
+**Problemas de conexão com Expo Go:**
+- Certifique-se de que os dispositivos estão na mesma rede WiFi
+- Verifique as configurações do firewall
+- Tente reiniciar o Metro bundler
+
+---
+
+## 🔐 Notas de Segurança
+
+> **Importante:** O endpoint público de redirecionamento `/r/{code}` é intencionalmente público para permitir que QR codes sejam escaneados por qualquer pessoa. Se você precisa de links privados, será necessário implementar autenticação neste endpoint (nota: isso quebrará a funcionalidade pública dos QR codes).
+
+- Todas as operações de gerenciamento de links requerem autenticação
+- Usuários só podem modificar seus próprios links e perfil
+- Tokens JWT são armazenados de forma segura usando Expo SecureStore
+- Rastreamento de cliques registra endereços IP para análise
+
+---
+
+## 📄 Licença
+
+Este projeto está licenciado sob a **Licença MIT** - veja o arquivo [LICENSE](LICENSE) para detalhes.
+
+---
+
+## 👨‍💻 Contribuidores
+
+**QrLinkki** é desenvolvido e mantido por:
+
+<table>
+  <tr>
+    <td align="center">
+      <a href="https://github.com/alexscarano">
+        <img src="https://github.com/alexscarano.png" width="100" style="border-radius: 50%;" alt="alexscarano"/>
+        <br />
+        <b>Alex Scarano</b>
+      </a>
+      <br />
+      <sub>Backend (API .NET + Arquitetura)</sub>
+    </td>
+    <td align="center">
+      <a href="https://github.com/Wpnnt">
+        <img src="https://github.com/Wpnnt.png" width="100" style="border-radius: 50%;" alt="Wpnnt"/>
+        <br />
+        <b>Wpnnt</b>
+      </a>
+      <br />
+      <sub>Frontend (React Native App)</sub>
+    </td>
+  </tr>
+</table>
+
+---
+
+## 🌟 Suporte
+
+Se você achar este projeto útil, considere dar uma ⭐️ no GitHub!
+
+Para dúvidas ou suporte, por favor [abra uma issue](https://github.com/Wpnnt/QrLinkki/issues).
+
+---
+
+<div align="center">
+
+**Feito com ❤️ usando .NET e React Native**
+
+</div>
